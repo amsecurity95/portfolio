@@ -1,0 +1,111 @@
+/* Dark Mode for Admin Panel — uses design tokens */
+:root {
+  --admin-bg: #0a0a0a;
+  --admin-surface: #1a1a1a;
+  --admin-surface-hover: #2a2a2a;
+  --admin-border: #2a2a2a;
+  --admin-border-hover: #3a3a3a;
+  --admin-text: #e5e5e5;
+  --admin-muted: #888;
+}
+
+body.admin-dark {
+  background: var(--admin-bg);
+  color: var(--admin-text);
+}
+
+body.admin-dark .topbar {
+  background: var(--admin-surface);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+body.admin-dark .card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+body.admin-dark .input {
+  background: #0f0f0f;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+body.admin-dark .input:focus {
+  border-color: var(--green);
+  background: #141414;
+}
+
+body.admin-dark .btn.secondary {
+  background: var(--admin-surface-hover);
+  color: var(--admin-text);
+  border: 1px solid var(--admin-border-hover);
+}
+
+body.admin-dark .btn.secondary:hover {
+  background: var(--admin-border-hover);
+}
+
+body.admin-dark .btn.primary {
+  background: var(--green);
+  color: white;
+}
+
+body.admin-dark .btn.danger {
+  background: var(--danger);
+  color: white;
+}
+
+body.admin-dark .btn.danger:hover {
+  background: var(--danger-hover);
+}
+
+body.admin-dark .muted {
+  color: var(--admin-muted);
+}
+
+body.admin-dark .sectionTitle {
+  color: var(--admin-text);
+}
+
+body.admin-dark .chip {
+  background: var(--admin-surface-hover);
+  color: var(--admin-text);
+  border: 1px solid var(--admin-border-hover);
+}
+
+body.admin-dark .chip:hover {
+  background: var(--admin-border-hover);
+}
+
+body.admin-dark .chip.active {
+  background: var(--green);
+  color: white;
+}
+
+body.admin-dark .banner {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  color: var(--admin-text);
+}
+
+body.admin-dark .placeCard {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+}
+
+body.admin-dark .badge {
+  background: var(--admin-surface-hover);
+  color: var(--admin-text);
+}
+
+body.admin-dark .label {
+  color: var(--admin-text);
+}
+
+
+
+
+
+
+

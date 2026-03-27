@@ -1,0 +1,3368 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tropical Map — Voir la carte</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="/demos/assets/favicon-48x48.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/demos/assets/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/demos/assets/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/demos/assets/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link rel="stylesheet" href="/demos/assets/app.css" />
+    <link rel="stylesheet" href="/demos/assets/gmaps.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <script src="https://unpkg.com/mapbox-gl-leaflet@0.0.16/leaflet-mapbox-gl.js"></script>
+    <script src="/demos/config.js"></script>
+    <script>window.USE_BACKEND = false;</script>
+    <script src="/demos/assets/app.js"></script>
+    <script src="/demos/assets/api.js"></script>
+    <style>
+      /* Minimal overrides - main styles in gmaps.css */
+      .mapBox { height: 100%; width: 100%; }
+      .pinLegend{display:flex; gap:10px; flex-wrap:wrap}
+      .dot{width:12px; height:12px; border-radius:999px; display:inline-block; border:2px solid #fff; box-shadow: 0 6px 16px rgba(10,42,67,.18)}
+      .dot.home{background: var(--green)}
+      .dot.business{background: #DC2626}
+      .addPlaceModal {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .modalContent {
+        background: white;
+        border-radius: 8px;
+        padding: 24px;
+        max-width: 500px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 2px 7px 1px rgba(0,0,0,.3);
+      }
+      .pins-guide-btn:hover { background: #1a9a5a !important; border-color: #1a9a5a !important; }
+
+      /* Map Guide Modal */
+      .map-guide-overlay {
+        position: fixed; inset: 0;
+        background: rgba(0,0,0,.5);
+        z-index: 10001;
+        display: flex; align-items: center; justify-content: center;
+        padding: 20px;
+      }
+      .map-guide-content {
+        background: #fff;
+        border-radius: 12px;
+        max-width: 440px;
+        width: 100%;
+        max-height: 90vh;
+        overflow: hidden;
+        display: flex; flex-direction: column;
+        box-shadow: 0 8px 32px rgba(0,0,0,.3);
+      }
+      .map-guide-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 20px 24px;
+        border-bottom: 1px solid var(--border);
+      }
+      .map-guide-header h2 {
+        margin: 0; font-size: 20px; font-weight: 800;
+      }
+      .map-guide-close {
+        background: none; border: none;
+        cursor: pointer; padding: 4px;
+        color: #5f6368;
+      }
+      .map-guide-close:hover { color: #202124; }
+      .map-guide-close .material-icons { font-size: 24px; }
+      .map-guide-body {
+        padding: 20px 24px;
+        overflow-y: auto;
+      }
+      .map-guide-item {
+        display: flex; gap: 16px;
+        margin-bottom: 20px;
+      }
+      .map-guide-item:last-child { margin-bottom: 0; }
+      .map-guide-icon {
+        flex-shrink: 0;
+        width: 40px; height: 40px;
+        border-radius: 10px;
+        background: rgba(31,175,106,.1);
+        display: flex; align-items: center; justify-content: center;
+        color: var(--green);
+      }
+      .map-guide-icon .material-icons { font-size: 22px; }
+      .map-guide-icon--red { background: rgba(220,38,38,.1); color: #DC2626; }
+      .map-guide-item strong { display: block; font-size: 15px; margin-bottom: 4px; }
+      .map-guide-item p {
+        margin: 0; font-size: 14px; color: var(--secondary-text);
+        line-height: 1.5;
+      }
+      .map-guide-footer {
+        padding: 16px 24px;
+        border-top: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: space-between;
+        gap: 12px; flex-wrap: wrap;
+      }
+      .map-guide-link {
+        font-size: 13px; color: var(--green);
+        font-weight: 600; text-decoration: none;
+      }
+      .map-guide-link:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body class="gmaps-page">
+    <!-- Hidden topbar kept for buildNav() compatibility -->
+    <div class="topbar" style="display:none!important">
+      <div class="wrap">
+        <div class="row">
+          <a href="index.html" class="brand" aria-label="Tropical Map home"><img src="/demos/assets/brand.svg" alt="" /><span>Tropical Map</span></a>
+          <div id="tmNavRight" style="display:flex; gap:8px; align-items:center"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Search Section (search bar + category chips) -->
+    <div class="gm-search-section" id="gmSearchSection">
+      <div class="gm-search-bar" id="gmSearchBar">
+        <button class="gm-hamburger" id="gmHamburger" aria-label="Menu">
+          <span class="material-icons">menu</span>
+        </button>
+        <input id="searchInput" class="gm-search-input" type="text" placeholder="Rechercher un lieu..." autocomplete="off" />
+        <button class="gm-search-icon" id="searchBtn" type="button" aria-label="Rechercher">
+          <span class="material-icons">search</span>
+        </button>
+      </div>
+      <div class="gm-category-bar" id="categoriesContainer">
+        <div class="gm-chips-row">
+          <button class="reportChip" data-type="incident" title="Incident">
+            <span class="material-icons">warning</span><span class="chip-label">Incident</span>
+          </button>
+          <button class="reportChip" data-type="accident" title="Accident">
+            <span class="material-icons">car_crash</span><span class="chip-label">Accident</span>
+          </button>
+          <button class="reportChip" data-type="work_road" title="Travaux">
+            <span class="material-icons">construction</span><span class="chip-label">Travaux</span>
+          </button>
+          <button class="reportChip" data-type="wild_animal" title="Animal dangereux">
+            <span class="material-icons">pets</span><span class="chip-label">Animal dangereux</span>
+          </button>
+          <button class="reportChip" data-type="event" title="Événement">
+            <span class="material-icons">music_note</span><span class="chip-label">Événement</span>
+          </button>
+          <button class="reportChip" data-type="rain" title="Pluie">
+            <span class="material-icons">water_drop</span><span class="chip-label">Pluie</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Map Controls (right side) -->
+    <div class="gm-controls">
+      <div class="gm-ctrl-group">
+        <button class="gm-ctrl-btn" id="gmZoomIn" aria-label="Zoom avant" title="Zoom avant">
+          <span class="material-icons">add</span>
+        </button>
+        <div class="gm-ctrl-divider"></div>
+        <button class="gm-ctrl-btn" id="gmZoomOut" aria-label="Zoom arrière" title="Zoom arrière">
+          <span class="material-icons">remove</span>
+        </button>
+      </div>
+      <button class="gm-ctrl-single" id="gmMyLocation" aria-label="Ma position" title="Ma position">
+        <span class="material-icons">my_location</span>
+      </button>
+      <button class="gm-ctrl-single" id="gmDayNightToggle" aria-label="Vue jour" title="Passer en vue jour (temporaire)">
+        <span class="material-icons" id="gmDayNightIcon">wb_sunny</span>
+      </button>
+      <button class="gm-ctrl-single" id="gmLayerToggle" aria-label="Changer de couche" title="Carte / Satellite">
+        <span class="material-icons">layers</span>
+      </button>
+      <button class="gm-ctrl-single" id="gmSatelliteClearBtn" aria-label="Vue satellite claire" title="Vue satellite claire (haute qualité)" style="display:none">
+        <span class="material-icons">high_quality</span>
+      </button>
+      <div class="gm-add-dropdown" id="addPlaceDropdownWrap" style="display:none">
+        <button class="gm-ctrl-single gm-add-place" id="addPlaceBtn" aria-label="Ajouter / Signaler / Annoncer" title="Ajouter un lieu, signaler ou publier" aria-haspopup="true" aria-expanded="false">
+          <span class="material-icons">add_location</span>
+        </button>
+        <div class="gm-add-menu" id="addPlaceMenu" role="menu" aria-hidden="true">
+          <button type="button" role="menuitem" data-action="add-pin"><span class="material-icons">add_location</span> Ajouter un lieu</button>
+          <a href="dashboard/new-place.html" role="menuitem"><span class="material-icons">place</span> Ajouter une adresse</a>
+          <a href="report-incident.html" role="menuitem"><span class="material-icons">warning</span> Signaler un danger</a>
+          <a href="dashboard/new-listing.html" role="menuitem"><span class="material-icons">campaign</span> Publier une annonce</a>
+          <button type="button" role="menuitem" data-action="delete-pin" id="addMenuDeleteBtn" style="display:none"><span class="material-icons">delete</span> Supprimer un lieu</button>
+        </div>
+      </div>
+      <button class="gm-ctrl-single" id="gmMapGuideBtn" aria-label="Guide de la carte" title="Voir le guide">
+        <span class="material-icons">help_outline</span>
+      </button>
+      <a class="gm-ctrl-single gm-home-btn" id="gmHomeBtn" href="index.html" aria-label="Accueil" title="Accueil">
+        <span class="material-icons">home</span>
+      </a>
+      <button class="gm-ctrl-single" id="gmClosePreviewBtn" aria-label="Retour" title="Retour" type="button">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <!-- Clock (top-right) with city selector -->
+    <div class="gm-clock-wrapper">
+      <div class="gm-clock" id="gmClock" title="Cliquer pour changer la ville">
+        <span class="material-icons gm-clock-icon">schedule</span>
+        <div class="gm-clock-text">
+          <span id="gmClockTime">--:--:--</span>
+          <span class="gm-clock-label" id="gmClockLabel">Lubumbashi</span>
+        </div>
+      </div>
+      <div class="gm-clock-dropdown" id="gmClockDropdown" hidden>
+        <button type="button" class="gm-clock-dropdown-option" data-city="Lubumbashi" data-tz="Africa/Lubumbashi" data-lat="-11.664" data-lng="27.479">Lubumbashi</button>
+        <button type="button" class="gm-clock-dropdown-option" data-city="Kinshasa" data-tz="Africa/Kinshasa" data-lat="-4.3217" data-lng="15.3125">Kinshasa</button>
+        <button type="button" class="gm-clock-dropdown-option" data-city="Goma" data-tz="Africa/Lubumbashi" data-lat="-1.6744" data-lng="29.2239">Goma</button>
+        <button type="button" class="gm-clock-dropdown-option" data-city="Bukavu" data-tz="Africa/Lubumbashi" data-lat="-2.4928" data-lng="28.8728">Bukavu</button>
+        <button type="button" class="gm-clock-dropdown-option" data-city="Kolwezi" data-tz="Africa/Lubumbashi" data-lat="-10.7148" data-lng="25.4667">Kolwezi</button>
+        <button type="button" class="gm-clock-dropdown-option" data-city="Likasi" data-tz="Africa/Lubumbashi" data-lat="-10.9833" data-lng="26.7333">Likasi</button>
+        <button type="button" class="gm-clock-dropdown-option" data-city="Johannesburg" data-tz="Africa/Johannesburg" data-lat="-26.2041" data-lng="28.0473">Johannesburg</button>
+        <button type="button" class="gm-clock-dropdown-option" data-city="Nairobi" data-tz="Africa/Nairobi" data-lat="-1.2921" data-lng="36.8219">Nairobi</button>
+      </div>
+    </div>
+
+    <!-- Legacy elements kept for JS compatibility -->
+    <button class="togglePanelBtn" id="togglePanelBtn" style="display:none!important"><span class="material-icons" id="togglePanelIcon">menu</span></button>
+
+    <!-- Add Place Modal -->
+    <div id="addPlaceModal" class="addPlaceModal" style="display:none">
+      <div class="modalContent">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+          <h2 style="margin:0; font-size:20px; font-weight:900">Ajouter un lieu</h2>
+          <button id="closeAddPlaceModal" style="background:none; border:none; cursor:pointer; padding:4px">
+            <span class="material-icons" style="font-size:24px">close</span>
+          </button>
+        </div>
+        <form id="addPlaceForm">
+          <div class="field">
+            <div class="label">Nom du lieu *</div>
+            <input type="text" id="addPlaceName" class="input" required placeholder="Ex: Restaurant Le Palmier" />
+          </div>
+          <div class="field">
+            <div class="label">Type *</div>
+            <select id="addPlaceType" class="input" required>
+              <option value="business">Entreprise</option>
+              <option value="home">Résidence</option>
+              <option value="restaurant">Restaurant</option>
+              <option value="hotel">Hôtel</option>
+              <option value="school">École / Université</option>
+              <option value="church">Église / Lieu de culte</option>
+              <option value="hospital">Hôpital</option>
+              <option value="clinic">Clinique / Pharmacie</option>
+              <option value="bank">Banque</option>
+              <option value="station">Station-service</option>
+              <option value="market">Marché / Supermarché</option>
+              <option value="airport">Aéroport</option>
+              <option value="government">Bureau gouvernemental</option>
+              <option value="police">Commissariat</option>
+              <option value="park">Parc / Jardin</option>
+              <option value="stadium">Stade / Terrain de sport</option>
+              <option value="parking">Parking</option>
+              <option value="salon">Salon de coiffure</option>
+              <option value="gym">Salle de sport</option>
+              <option value="cafe">Café / Boulangerie</option>
+              <option value="bar">Bar / Nightclub</option>
+              <option value="cinema">Cinéma / Divertissement</option>
+              <option value="carwash">Car Wash</option>
+              <option value="workshop">Atelier / Garage</option>
+              <optgroup label="— Signaler —">
+                <option value="incident">Incident / Alerte</option>
+                <option value="accident">Accident</option>
+                <option value="work_road">Travaux / Chantier</option>
+                <option value="wild_animal">Animal dangereux</option>
+                <option value="event">Événement (concert, fête…)</option>
+                <option value="rain">Pluie / Inondation</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="field">
+            <div class="label">Commune *</div>
+            <select id="addPlaceCommune" class="input" required></select>
+          </div>
+          <div class="field">
+            <div class="label">Quartier *</div>
+            <select id="addPlaceNeighborhood" class="input" required></select>
+          </div>
+          <div class="field">
+            <div class="label">Repère</div>
+            <input type="text" id="addPlaceLandmark" class="input" placeholder="Ex: Près du rond-point" />
+          </div>
+          <div class="field">
+            <div class="label">Téléphone</div>
+            <input type="tel" id="addPlacePhone" class="input" placeholder="+243..." />
+          </div>
+          <div class="field">
+            <div class="label">Catégories (séparées par des virgules)</div>
+            <input type="text" id="addPlaceCategories" class="input" placeholder="Restaurant, Hôtel, etc." />
+          </div>
+          <div class="field" id="iconPickerField" style="display:none">
+            <div class="label">Icône sur la carte *</div>
+            <div class="gm-icon-picker" id="iconPicker">
+              <button type="button" class="gm-icon-option" data-icon="restaurant" title="Restaurant"><span class="material-icons">restaurant</span></button>
+              <button type="button" class="gm-icon-option" data-icon="hotel" title="Hôtel"><span class="material-icons">hotel</span></button>
+              <button type="button" class="gm-icon-option" data-icon="church" title="Église"><span class="material-icons">church</span></button>
+              <button type="button" class="gm-icon-option" data-icon="station" title="Station-service"><span class="material-icons">local_gas_station</span></button>
+              <button type="button" class="gm-icon-option" data-icon="pharmacy" title="Pharmacie"><span class="material-icons">local_pharmacy</span></button>
+              <button type="button" class="gm-icon-option" data-icon="hospital" title="Hôpital"><span class="material-icons">local_hospital</span></button>
+              <button type="button" class="gm-icon-option" data-icon="school" title="École"><span class="material-icons">school</span></button>
+              <button type="button" class="gm-icon-option" data-icon="bank" title="Banque"><span class="material-icons">account_balance</span></button>
+              <button type="button" class="gm-icon-option" data-icon="market" title="Marché"><span class="material-icons">store</span></button>
+              <button type="button" class="gm-icon-option" data-icon="shop" title="Magasin"><span class="material-icons">shopping_bag</span></button>
+              <button type="button" class="gm-icon-option" data-icon="cafe" title="Café"><span class="material-icons">local_cafe</span></button>
+              <button type="button" class="gm-icon-option" data-icon="bar" title="Bar"><span class="material-icons">local_bar</span></button>
+              <button type="button" class="gm-icon-option" data-icon="gym" title="Salle de sport"><span class="material-icons">fitness_center</span></button>
+              <button type="button" class="gm-icon-option" data-icon="parking" title="Parking"><span class="material-icons">local_parking</span></button>
+              <button type="button" class="gm-icon-option" data-icon="salon" title="Salon"><span class="material-icons">content_cut</span></button>
+              <button type="button" class="gm-icon-option" data-icon="government" title="Gouvernement"><span class="material-icons">assured_workload</span></button>
+              <button type="button" class="gm-icon-option" data-icon="police" title="Police"><span class="material-icons">local_police</span></button>
+              <button type="button" class="gm-icon-option" data-icon="park" title="Parc"><span class="material-icons">park</span></button>
+              <button type="button" class="gm-icon-option" data-icon="stadium" title="Stade"><span class="material-icons">sports_soccer</span></button>
+              <button type="button" class="gm-icon-option" data-icon="cinema" title="Cinéma"><span class="material-icons">movie</span></button>
+              <button type="button" class="gm-icon-option" data-icon="carwash" title="Car Wash"><span class="material-icons">local_car_wash</span></button>
+              <button type="button" class="gm-icon-option" data-icon="workshop" title="Atelier / Garage"><span class="material-icons">build</span></button>
+              <button type="button" class="gm-icon-option" data-icon="default" title="Entreprise (défaut)"><span class="material-icons">business</span></button>
+            </div>
+            <input type="hidden" id="addPlacePinIcon" value="" />
+          </div>
+          <div class="banner" style="margin-top:16px; background:rgba(31,175,106,.08); border-color:rgba(31,175,106,.25)">
+            <strong>Position:</strong> <span id="addPlaceLocation">Cliquez sur la carte pour définir</span>
+          </div>
+          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:20px">
+            <button type="button" id="cancelAddPlace" class="btn secondary">Annuler</button>
+            <button type="submit" class="btn primary">Enregistrer</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Map Guide Modal (first-time + ? button) -->
+    <div id="mapGuideModal" class="map-guide-overlay" role="dialog" aria-labelledby="mapGuideTitle" aria-modal="true" style="display:none">
+      <div class="map-guide-content">
+        <div class="map-guide-header">
+          <h2 id="mapGuideTitle">Guide de la carte</h2>
+          <button id="mapGuideClose" class="map-guide-close" aria-label="Fermer">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+        <div class="map-guide-body">
+          <div class="map-guide-item">
+            <span class="map-guide-icon"><span class="material-icons">touch_app</span></span>
+            <div>
+              <strong>Naviguer sur la carte</strong>
+              <p>Faites glisser la carte pour vous déplacer. Utilisez la molette ou pincez pour zoomer et dézoomer. Les boutons + et − à droite permettent aussi de zoomer.</p>
+            </div>
+          </div>
+          <div class="map-guide-item">
+            <span class="map-guide-icon"><span class="material-icons">place</span></span>
+            <div>
+              <strong>Cliquer sur un pin</strong>
+              <p>Cliquez sur un repère (vert = résidence, rouge = commerce) pour afficher ses informations. Le panneau latéral s'ouvre avec le détail du lieu et son code Tropical Map.</p>
+            </div>
+          </div>
+          <div class="map-guide-item">
+            <span class="map-guide-icon"><span class="material-icons">search</span></span>
+            <div>
+              <strong>Rechercher un lieu</strong>
+              <p>Tapez un nom, un code TM ou une adresse dans la barre de recherche, puis validez. La carte se centre sur le résultat et affiche les lieux correspondants.</p>
+            </div>
+          </div>
+          <div class="map-guide-item">
+            <span class="map-guide-icon"><span class="material-icons">filter_list</span></span>
+            <div>
+              <strong>Filtrer les lieux</strong>
+              <p>Ouvrez le panneau latéral (menu ☰) pour filtrer par type, commune ou quartier. Les catégories sous la recherche permettent de filtrer rapidement.</p>
+            </div>
+          </div>
+          <div class="map-guide-item">
+            <span class="map-guide-icon"><span class="material-icons">add_location</span></span>
+            <div>
+              <strong>Ajouter ou signaler</strong>
+              <p>Cliquez sur le bouton vert <span class="material-icons" style="font-size:16px; vertical-align:middle">add_location</span> pour ajouter un lieu, signaler un incident ou publier une annonce. Les chips (Incident, Accident, Travaux…) permettent de placer un signalement directement.</p>
+            </div>
+          </div>
+          <div class="map-guide-item">
+            <span class="map-guide-icon"><span class="material-icons">layers</span></span>
+            <div>
+              <strong>Vue carte ou satellite</strong>
+              <p>Utilisez le bouton couches pour basculer entre carte routière et vue satellite. L'icône soleil permet de passer en mode jour ou nuit.</p>
+            </div>
+          </div>
+          <div class="map-guide-item">
+            <span class="map-guide-icon"><span class="material-icons">my_location</span></span>
+            <div>
+              <strong>Ma position</strong>
+              <p>Cliquez sur l'icône boussole pour centrer la carte sur votre position GPS (autorisez la géolocalisation si demandé).</p>
+            </div>
+          </div>
+        </div>
+        <div class="map-guide-footer">
+          <a href="pins-guide.html" class="map-guide-link">Voir le guide complet des pins</a>
+          <button id="mapGuideGotIt" class="btn primary">Compris</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="sidePanel" id="sidePanel">
+      <div class="panel">
+        <!-- Google Maps style panel header -->
+        <div class="gm-panel-header">
+          <button class="gm-back-btn gm-panel-close" id="gmPanelClose" onclick="clearPlaceSelection()" aria-label="Fermer" title="Fermer">
+            <span class="material-icons">close</span>
+          </button>
+          <a href="index.html" class="gm-brand-link">
+            <img src="/demos/assets/brand.svg" alt="Tropical Map" />
+            <span>Tropical Map</span>
+          </a>
+          <button id="clearSelectionBtn" onclick="clearPlaceSelection()" style="background:none; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; display:none; align-items:center; justify-content:center; color:#5f6368" aria-label="Effacer la sélection" title="Effacer la sélection">
+            <span class="material-icons" style="font-size: 20px;">close</span>
+          </button>
+        </div>
+
+        <div id="resultCount" style="font-size:12px; padding:4px 8px; display:inline-block; background:#f1f3f4; border-radius:4px; color:#5f6368; font-weight:500; margin-bottom:12px">0 lieux</div>
+
+        <!-- Inspector/Admin: Pending approval list -->
+        <div id="pendingApprovalSection" style="display:none; margin-bottom:16px">
+          <div id="pendingApprovalToggle" class="filter-toggle" style="cursor:pointer; padding:8px 0; border-bottom:1px solid var(--border)">
+            <div class="sectionTitle" style="margin:0; display:flex; align-items:center; gap:8px">
+              <span class="material-icons" style="font-size:18px; color:#F59E0B">pending_actions</span>
+              Demandes d'approbation
+              <span id="pendingApprovalCount" class="badge" style="margin-left:auto; background:#F59E0B; color:#fff; font-size:11px">0</span>
+            </div>
+            <span class="material-icons" id="pendingApprovalIcon" style="font-size: 18px; transition: transform 0.2s">expand_more</span>
+          </div>
+          <div id="pendingApprovalList" style="display:none; margin-top:8px; max-height:200px; overflow-y:auto"></div>
+        </div>
+
+        <div id="filterToggle" class="filter-toggle">
+          <div class="sectionTitle" style="margin:0">Filtres</div>
+          <span class="material-icons" id="filterIcon" style="font-size: 18px; transition: transform 0.2s">expand_more</span>
+        </div>
+        <div id="filterPanel" style="margin-top:8px; display:none">
+          <div class="field">
+            <div class="label">Type</div>
+            <select class="select" id="filterType">
+              <option value="">Tous</option>
+              <option value="home">Résidence</option>
+              <option value="business">Entreprise</option>
+              <option value="airport">Aéroport</option>
+              <option value="hospital">Hôpital</option>
+              <option value="clinic">Clinique</option>
+              <optgroup label="— Signaler —">
+                <option value="incident">Incident</option>
+                <option value="accident">Accident</option>
+                <option value="work_road">Travaux</option>
+                <option value="wild_animal">Animal dangereux</option>
+                <option value="event">Événement</option>
+                <option value="rain">Pluie</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="field" style="margin-top:10px">
+            <div class="label">Commune</div>
+            <select class="select" id="filterCommune">
+              <option value="">Toutes</option>
+            </select>
+            <input type="text" id="filterCommuneCustom" class="input" placeholder="Ou tapez une commune..." style="display:none; margin-top:8px" />
+          </div>
+          <div class="field" style="margin-top:10px">
+            <div class="label">Quartier</div>
+            <select class="select" id="filterNeighborhood">
+              <option value="">Tous</option>
+            </select>
+            <input type="text" id="filterNeighborhoodCustom" class="input" placeholder="Ou tapez un quartier..." style="display:none; margin-top:8px" />
+          </div>
+          <button id="resetFilters" class="btn secondary small" style="margin-top:12px; width:100%">
+            <span class="material-icons" style="font-size: 16px; vertical-align: middle;">refresh</span>
+            Réinitialiser
+          </button>
+        </div>
+
+        <div id="activeFilters" style="margin-top:12px; display:flex; gap:6px; flex-wrap:wrap"></div>
+
+        <div class="sectionTitle" style="margin-top:16px; margin-bottom:8px">Type de lieu</div>
+        <div class="panel-category-chips" id="panelCategoryChips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px">
+          <button class="categoryChip" data-category="restaurant" title="Restaurant"><span class="material-icons" style="font-size:16px">restaurant</span><span class="chip-label">Restaurant</span></button>
+          <button class="categoryChip" data-category="hotel" title="Hôtel"><span class="material-icons" style="font-size:16px">hotel</span><span class="chip-label">Hôtel</span></button>
+          <button class="categoryChip" data-category="church" title="Église"><span class="material-icons" style="font-size:16px">church</span><span class="chip-label">Église</span></button>
+          <button class="categoryChip" data-category="station" title="Station"><span class="material-icons" style="font-size:16px">local_gas_station</span><span class="chip-label">Station</span></button>
+          <button class="categoryChip" data-category="pharmacy" title="Pharmacie"><span class="material-icons" style="font-size:16px">local_pharmacy</span><span class="chip-label">Pharmacie</span></button>
+          <button class="categoryChip" data-category="hospital" title="Hôpital"><span class="material-icons" style="font-size:16px">local_hospital</span><span class="chip-label">Hôpital</span></button>
+          <button class="categoryChip" data-category="school" title="École"><span class="material-icons" style="font-size:16px">school</span><span class="chip-label">École</span></button>
+          <button class="categoryChip" data-category="bank" title="Banque"><span class="material-icons" style="font-size:16px">account_balance</span><span class="chip-label">Banque</span></button>
+          <button class="categoryChip" data-category="market" title="Marché"><span class="material-icons" style="font-size:16px">store</span><span class="chip-label">Marché</span></button>
+          <button class="categoryChip" data-category="shop" title="Magasin"><span class="material-icons" style="font-size:16px">shopping_bag</span><span class="chip-label">Magasin</span></button>
+          <button class="categoryChip" data-category="park" title="Parc"><span class="material-icons" style="font-size:16px">park</span><span class="chip-label">Parc</span></button>
+        </div>
+
+        <!-- Search Results Container -->
+        <div id="searchResults" style="margin-top:16px;"></div>
+
+        <div class="sectionTitle" style="margin-top:20px">Villes</div>
+        <div class="pinLegend cityLegend" style="display:flex; flex-direction:column; gap:8px; margin-top:12px">
+          <button type="button" class="badge cityLegendBtn" data-lat="-11.664" data-lng="27.479" data-zoom="12" style="font-size:13px; padding:8px 12px; text-align:left; cursor:pointer; border:none; background:#f1f3f4; border-radius:8px; display:flex; align-items:center; gap:8px">
+            <span class="material-icons" style="font-size:18px; color:#5f6368">location_city</span>
+            Lubumbashi
+          </button>
+          <button type="button" class="badge cityLegendBtn" data-lat="-4.3217" data-lng="15.3125" data-zoom="12" style="font-size:13px; padding:8px 12px; text-align:left; cursor:pointer; border:none; background:#f1f3f4; border-radius:8px; display:flex; align-items:center; gap:8px">
+            <span class="material-icons" style="font-size:18px; color:#5f6368">location_city</span>
+            Kinshasa
+          </button>
+          <button type="button" class="badge cityLegendBtn" data-lat="-1.6744" data-lng="29.2239" data-zoom="12" style="font-size:13px; padding:8px 12px; text-align:left; cursor:pointer; border:none; background:#f1f3f4; border-radius:8px; display:flex; align-items:center; gap:8px">
+            <span class="material-icons" style="font-size:18px; color:#5f6368">location_city</span>
+            Goma
+          </button>
+          <button type="button" class="badge cityLegendBtn" data-lat="-2.4928" data-lng="28.8728" data-zoom="12" style="font-size:13px; padding:8px 12px; text-align:left; cursor:pointer; border:none; background:#f1f3f4; border-radius:8px; display:flex; align-items:center; gap:8px">
+            <span class="material-icons" style="font-size:18px; color:#5f6368">location_city</span>
+            Bukavu
+          </button>
+          <button type="button" class="badge cityLegendBtn" data-lat="-10.7148" data-lng="25.4667" data-zoom="12" style="font-size:13px; padding:8px 12px; text-align:left; cursor:pointer; border:none; background:#f1f3f4; border-radius:8px; display:flex; align-items:center; gap:8px">
+            <span class="material-icons" style="font-size:18px; color:#5f6368">location_city</span>
+            Kolwezi
+          </button>
+          <button type="button" class="badge cityLegendBtn" data-lat="-10.9833" data-lng="26.7333" data-zoom="12" style="font-size:13px; padding:8px 12px; text-align:left; cursor:pointer; border:none; background:#f1f3f4; border-radius:8px; display:flex; align-items:center; gap:8px">
+            <span class="material-icons" style="font-size:18px; color:#5f6368">location_city</span>
+            Likasi
+          </button>
+          <button type="button" class="badge cityLegendBtn" data-lat="-26.2041" data-lng="28.0473" data-zoom="12" style="font-size:13px; padding:8px 12px; text-align:left; cursor:pointer; border:none; background:#f1f3f4; border-radius:8px; display:flex; align-items:center; gap:8px">
+            <span class="material-icons" style="font-size:18px; color:#5f6368">location_city</span>
+            Johannesburg
+          </button>
+          <button type="button" class="badge cityLegendBtn" data-lat="-1.2921" data-lng="36.8219" data-zoom="12" style="font-size:13px; padding:8px 12px; text-align:left; cursor:pointer; border:none; background:#f1f3f4; border-radius:8px; display:flex; align-items:center; gap:8px">
+            <span class="material-icons" style="font-size:18px; color:#5f6368">location_city</span>
+            Nairobi
+          </button>
+        </div>
+        <a href="pins-guide.html" class="btn secondary small pins-guide-btn" style="margin-top:12px; width:100%; display:flex; align-items:center; justify-content:center; gap:6px; text-decoration:none; background:var(--green); color:#fff; border-color:var(--green)">
+          <span class="material-icons" style="font-size:18px">help_outline</span>
+          En savoir plus sur les pins
+        </a>
+        <a href="index.html" class="btn secondary small" style="margin-top:24px; width:100%; display:flex; align-items:center; justify-content:center; gap:6px; text-decoration:none; background:#DC2626; color:#fff; border-color:#DC2626">
+          <span class="material-icons" style="font-size:18px">home</span>
+          Quitter
+        </a>
+      </div>
+    </div>
+
+    <!-- Full Screen Map -->
+    <div id="mapRoot" class="mapBox" aria-label="Voir la carte"></div>
+    <div id="mapLogoWrap" class="tm-map-layer-street">
+      <a href="index.html" class="tm-map-logo" aria-label="Tropical Map"><img src="/demos/assets/brand.svg" alt="" /><span>www.tropicalmap.com</span></a>
+    </div>
+    <div id="preview" class="banner" style="position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:200; display:none; max-width:90vw"></div>
+    <div id="pinContextMenu" class="gm-pin-context-menu" role="menu" aria-hidden="true" style="display:none">
+      <button type="button" class="gm-pin-context-item" data-action="delete">
+        <span class="material-icons">delete</span> Supprimer
+      </button>
+    </div>
+
+    <script>
+      // === MAIN MAP (canonical) ===
+      // Used everywhere in the app. Places display here only when approved by inspector/admin.
+      // Landing page (index.html) has a separate preview map with approved places only.
+      const TM = window.TM;
+      const L = window.L;
+
+      if (!TM || !L) {
+        console.error("TM or L not loaded");
+        alert("Erreur: TM ou Leaflet non chargé");
+      }
+
+      const map = L.map("mapRoot", { zoomControl: false, attributionControl: true }).setView([-11.664, 27.479], 12);
+      
+      // URL params for deep-linking to a location (e.g. from admin incidents "Voir sur la carte")
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlLat = urlParams.get("lat");
+      const urlLng = urlParams.get("lng");
+      const urlIncident = urlParams.get("incident");
+      const hasUrlLocation = urlLat && urlLng && !isNaN(parseFloat(urlLat)) && !isNaN(parseFloat(urlLng));
+      
+      // Pane for place pins: hide when zoomed out (city name visible), show when zoomed in
+      const PINS_MIN_ZOOM = 13;
+      map.createPane("placePinsPane");
+      map.getPane("placePinsPane").style.zIndex = 650;
+      
+      // Mapbox GL custom styled street map
+      const MAPBOX_TOKEN = (window.MAP_CONFIG && window.MAP_CONFIG.MAPBOX_TOKEN) || "";
+
+      // City/timezone for clock (persisted in localStorage)
+      const CLOCK_STORAGE_KEY = "gmClockCity";
+      let clockCity = { city: "Lubumbashi", tz: "Africa/Lubumbashi" };
+      try {
+        const stored = localStorage.getItem(CLOCK_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed.city && parsed.tz) clockCity = parsed;
+        }
+      } catch (e) {}
+
+      function getClockTime() {
+        return new Date(new Date().toLocaleString("en-US", { timeZone: clockCity.tz }));
+      }
+
+      function isNightTime() {
+        const hour = getClockTime().getHours();
+        return hour >= 19 || hour < 6;
+      }
+
+      // Live clock
+      function updateClock() {
+        const now = getClockTime();
+        const h = String(now.getHours()).padStart(2, "0");
+        const m = String(now.getMinutes()).padStart(2, "0");
+        const s = String(now.getSeconds()).padStart(2, "0");
+        const el = document.getElementById("gmClockTime");
+        if (el) el.textContent = `${h}:${m}:${s}`;
+      }
+      function updateClockLabel() {
+        const el = document.getElementById("gmClockLabel");
+        if (el) el.textContent = clockCity.city;
+        document.querySelectorAll(".gm-clock-dropdown-option").forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.city === clockCity.city);
+        });
+      }
+      updateClock();
+      updateClockLabel();
+      setInterval(updateClock, 1000);
+
+      // Center map on stored city if different from default
+      if (clockCity.city !== "Lubumbashi") {
+        const opt = document.querySelector(`.gm-clock-dropdown-option[data-city="${clockCity.city}"]`);
+        if (opt) {
+          const lat = parseFloat(opt.dataset.lat);
+          const lng = parseFloat(opt.dataset.lng);
+          if (!isNaN(lat) && !isNaN(lng)) map.setView([lat, lng], 12);
+        }
+      }
+
+      // City selector dropdown
+      const gmClock = document.getElementById("gmClock");
+      const gmClockDropdown = document.getElementById("gmClockDropdown");
+      if (gmClock && gmClockDropdown) {
+        gmClock.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const isHidden = gmClockDropdown.hidden;
+          gmClockDropdown.hidden = !isHidden;
+        });
+        gmClockDropdown.querySelectorAll(".gm-clock-dropdown-option").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            clockCity = { city: btn.dataset.city, tz: btn.dataset.tz };
+            localStorage.setItem(CLOCK_STORAGE_KEY, JSON.stringify(clockCity));
+            updateClockLabel();
+            gmClockDropdown.hidden = true;
+            // Fly map to selected city
+            const lat = parseFloat(btn.dataset.lat);
+            const lng = parseFloat(btn.dataset.lng);
+            if (!isNaN(lat) && !isNaN(lng)) {
+              map.flyTo([lat, lng], 12, { duration: 0.8 });
+            }
+          });
+        });
+        document.addEventListener("click", () => { gmClockDropdown.hidden = true; });
+      }
+
+      let isNight = isNightTime();
+      let userOverride = false;
+
+      // Day customizations
+      function applyDayStyle(mb) {
+        const roadColors = {
+          "road-minor": "#D0D0D0", "road-street": "#BFBFBF",
+          "road-secondary-tertiary": "#ADADAD", "road-primary": "#999999",
+          "road-motorway-trunk": "#808080",
+          "road-minor-case": "#B8B8B8", "road-street-case": "#A8A8A8",
+          "road-secondary-tertiary-case": "#959595", "road-primary-case": "#858585",
+          "road-motorway-trunk-case": "#666666",
+          "road-minor-link": "#D0D0D0", "road-major-link": "#ADADAD",
+          "road-major-link-case": "#959595",
+          "road-pedestrian": "#DCDCDC", "road-pedestrian-case": "#C5C5C5"
+        };
+        for (const [id, c] of Object.entries(roadColors)) {
+          try { mb.setPaintProperty(id, "line-color", c); } catch (e) {}
+        }
+        try { mb.setPaintProperty("land", "background-color", "#F8F4EE"); } catch (e) {}
+
+        // Green environment — trees, parks, vegetation
+        const greenLayers = [
+          "landuse-park", "landuse-cemetery", "landuse-hospital",
+          "landuse-school", "landuse-pitch", "landcover"
+        ];
+        greenLayers.forEach(id => {
+          try { mb.setPaintProperty(id, "fill-color", "#B5E4A0"); } catch (e) {}
+          try { mb.setPaintProperty(id, "fill-opacity", 0.7); } catch (e) {}
+        });
+        // Extra tree/forest layers
+        try { mb.setPaintProperty("landcover", "fill-color", [
+          "match", ["get", "class"],
+          "wood", "#7CC565", "scrub", "#96D683", "grass", "#C3E8AB", "crop", "#D5EDBE",
+          "#B5E4A0"
+        ]); } catch (e) {}
+
+        // Water — bright blue fill + visible waterways
+        try { mb.setPaintProperty("water", "fill-color", "#5BB8F5"); } catch (e) {}
+        try { mb.setPaintProperty("water", "fill-opacity", 0.85); } catch (e) {}
+        const waterwayLines = ["waterway", "waterway-small"];
+        waterwayLines.forEach(id => {
+          try { mb.setPaintProperty(id, "line-color", "#3A9AE0"); } catch (e) {}
+          try { mb.setPaintProperty(id, "line-width", 2); } catch (e) {}
+        });
+      }
+
+      // Night customizations
+      function applyNightStyle(mb) {
+        const roadColors = {
+          "road-minor": "#555555", "road-street": "#606060",
+          "road-secondary-tertiary": "#6A6A6A", "road-primary": "#777777",
+          "road-motorway-trunk": "#888888",
+          "road-minor-case": "#3A3A3A", "road-street-case": "#404040",
+          "road-secondary-tertiary-case": "#4A4A4A", "road-primary-case": "#505050",
+          "road-motorway-trunk-case": "#5A5A5A",
+          "road-minor-link": "#555555", "road-major-link": "#6A6A6A",
+          "road-major-link-case": "#4A4A4A",
+          "road-pedestrian": "#4A4A4A", "road-pedestrian-case": "#383838"
+        };
+        for (const [id, c] of Object.entries(roadColors)) {
+          try { mb.setPaintProperty(id, "line-color", c); } catch (e) {}
+        }
+
+        // Green environment at night — darker tones
+        const greenLayers = [
+          "landuse-park", "landuse-cemetery", "landuse-hospital",
+          "landuse-school", "landuse-pitch", "landcover"
+        ];
+        greenLayers.forEach(id => {
+          try { mb.setPaintProperty(id, "fill-color", "#1E4A2A"); } catch (e) {}
+          try { mb.setPaintProperty(id, "fill-opacity", 0.5); } catch (e) {}
+        });
+        try { mb.setPaintProperty("landcover", "fill-color", [
+          "match", ["get", "class"],
+          "wood", "#1A3D22", "scrub", "#22502E", "grass", "#264D2F", "crop", "#2B5533",
+          "#1E4A2A"
+        ]); } catch (e) {}
+
+        // Water at night — deep blue
+        try { mb.setPaintProperty("water", "fill-color", "#1A3B5C"); } catch (e) {}
+        try { mb.setPaintProperty("water", "fill-opacity", 0.9); } catch (e) {}
+        const waterwayLines = ["waterway", "waterway-small"];
+        waterwayLines.forEach(id => {
+          try { mb.setPaintProperty(id, "line-color", "#1A3B5C"); } catch (e) {}
+          try { mb.setPaintProperty(id, "line-width", 2); } catch (e) {}
+        });
+      }
+
+      // Thin roads (shared for day & night)
+      function applyThinRoads(mb) {
+        const thinRoads = {
+          "road-minor": 0.5, "road-street": 0.6,
+          "road-secondary-tertiary": 0.7, "road-primary": 0.7, "road-motorway-trunk": 0.7,
+          "road-minor-case": 0.5, "road-street-case": 0.5,
+          "road-secondary-tertiary-case": 0.6, "road-primary-case": 0.6, "road-motorway-trunk-case": 0.6,
+          "road-minor-link": 0.5, "road-major-link": 0.6, "road-major-link-case": 0.5,
+          "road-pedestrian": 0.5, "road-pedestrian-case": 0.5
+        };
+        for (const [id, scale] of Object.entries(thinRoads)) {
+          try {
+            const cur = mb.getPaintProperty(id, "line-width");
+            if (typeof cur === "number") {
+              mb.setPaintProperty(id, "line-width", cur * scale);
+            } else if (cur) {
+              const scaled = JSON.parse(JSON.stringify(cur));
+              if (scaled.stops) scaled.stops = scaled.stops.map(([z, w]) => [z, w * scale]);
+              mb.setPaintProperty(id, "line-width", scaled);
+            }
+          } catch (e) {}
+        }
+      }
+
+      const street = L.mapboxGL({
+        accessToken: MAPBOX_TOKEN,
+        style: isNight ? "mapbox://styles/mapbox/navigation-night-v1" : "mapbox://styles/mapbox/streets-v12",
+        attribution: '&copy; <a href="https://www.mapbox.com/">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      }).addTo(map);
+
+      const mbMap = street.getMapboxMap();
+      mbMap.on("style.load", () => {
+        if (isNight) {
+          applyNightStyle(mbMap);
+        } else {
+          applyDayStyle(mbMap);
+        }
+        applyThinRoads(mbMap);
+      });
+
+      // Check every minute and switch if day/night changes (only when user hasn't overridden)
+      setInterval(() => {
+        if (userOverride) return;
+        const nightNow = isNightTime();
+        if (nightNow !== isNight) {
+          isNight = nightNow;
+          mbMap.setStyle(isNight ? "mapbox://styles/mapbox/navigation-night-v1" : "mapbox://styles/mapbox/streets-v12");
+          if (typeof updateMapLogoLayer === "function") updateMapLogoLayer();
+        }
+      }, 60000);
+
+      // Day/Night toggle button (temporary — resets when leaving the page)
+      const dayNightBtn = document.getElementById("gmDayNightToggle");
+      const dayNightIcon = document.getElementById("gmDayNightIcon");
+      if (dayNightBtn && dayNightIcon) {
+        function updateDayNightButton() {
+          dayNightIcon.textContent = isNight ? "wb_sunny" : "nightlight_round";
+          dayNightBtn.setAttribute("title", isNight ? "Passer en vue jour (temporaire)" : "Revenir à la vue nuit");
+          dayNightBtn.setAttribute("aria-label", isNight ? "Vue jour" : "Vue nuit");
+        }
+        updateDayNightButton();
+        dayNightBtn.addEventListener("click", () => {
+          userOverride = true;
+          isNight = !isNight;
+          mbMap.setStyle(isNight ? "mapbox://styles/mapbox/navigation-night-v1" : "mapbox://styles/mapbox/streets-v12");
+          updateDayNightButton();
+          updateMapLogoLayer();
+        });
+      }
+
+      // Satellite: ArcGIS (clear, no labels) — default when switching to satellite
+      const satelliteClear = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.esri.com/">Esri</a> &mdash; Sources: Esri, Maxar, Earthstar Geographics'
+      });
+      // Satellite with labels (Mapbox satellite-streets) — optional when user wants avenue names
+      const satelliteWithLabels = MAPBOX_TOKEN
+        ? L.mapboxGL({
+            accessToken: MAPBOX_TOKEN,
+            style: "mapbox://styles/mapbox/satellite-streets-v12",
+            attribution: '&copy; <a href="https://www.mapbox.com/">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          })
+        : null;
+
+      // Layer state for custom toggle button
+      let currentLayer = "street";
+      let satelliteMode = "clear"; // "clear" = ArcGIS, "labels" = Mapbox satellite-streets
+
+      // Google Maps-style pin icons with react-icons style
+      // Helper function to get type display info
+      const getTypeInfo = (type) => {
+        const types = {
+          home:       { name: "Résidence",        color: "#1FAF6A", icon: "home",             bgColor: "rgba(31,175,106,0.15)" },
+          airport:    { name: "Aéroport",         color: "#0A2A43", icon: "flight",           bgColor: "rgba(10,42,67,0.15)" },
+          hospital:   { name: "Hôpital",          color: "#C62828", icon: "local_hospital",   bgColor: "rgba(220,38,38,0.15)" },
+          clinic:     { name: "Clinique",         color: "#C62828", icon: "local_hospital",   bgColor: "rgba(220,38,38,0.15)" },
+          restaurant: { name: "Restaurant",       color: "#E65100", icon: "restaurant",       bgColor: "rgba(230,81,0,0.15)" },
+          hotel:      { name: "Hôtel",            color: "#1565C0", icon: "hotel",            bgColor: "rgba(21,101,192,0.15)" },
+          school:     { name: "École",            color: "#4527A0", icon: "school",           bgColor: "rgba(69,39,160,0.15)" },
+          church:     { name: "Lieu de culte",    color: "#6A1B9A", icon: "church",           bgColor: "rgba(106,27,154,0.15)" },
+          bank:       { name: "Banque",           color: "#37474F", icon: "account_balance",  bgColor: "rgba(55,71,79,0.15)" },
+          station:    { name: "Station-service",  color: "#EF6C00", icon: "local_gas_station",bgColor: "rgba(239,108,0,0.15)" },
+          market:     { name: "Marché",           color: "#D84315", icon: "store",            bgColor: "rgba(216,67,21,0.15)" },
+          government: { name: "Gouvernement",     color: "#37474F", icon: "assured_workload", bgColor: "rgba(55,71,79,0.15)" },
+          police:     { name: "Commissariat",     color: "#1A237E", icon: "local_police",     bgColor: "rgba(26,35,126,0.15)" },
+          park:       { name: "Parc",             color: "#2E7D32", icon: "park",             bgColor: "rgba(46,125,50,0.15)" },
+          stadium:    { name: "Stade",            color: "#E65100", icon: "sports_soccer",     bgColor: "rgba(230,81,0,0.15)" },
+          parking:    { name: "Parking",          color: "#1565C0", icon: "local_parking",    bgColor: "rgba(21,101,192,0.15)" },
+          salon:      { name: "Salon",            color: "#F06292", icon: "content_cut",      bgColor: "rgba(240,98,146,0.15)" },
+          gym:        { name: "Salle de sport",   color: "#BF360C", icon: "fitness_center",   bgColor: "rgba(191,54,12,0.15)" },
+          cafe:       { name: "Café",             color: "#795548", icon: "local_cafe",       bgColor: "rgba(121,85,72,0.15)" },
+          bar:        { name: "Bar",              color: "#880E4F", icon: "local_bar",        bgColor: "rgba(136,14,79,0.15)" },
+          cinema:     { name: "Cinéma",           color: "#6A1B9A", icon: "movie",            bgColor: "rgba(106,27,154,0.15)" },
+          carwash:    { name: "Car Wash",         color: "#0277BD", icon: "local_car_wash",   bgColor: "rgba(2,119,189,0.15)" },
+          workshop:   { name: "Atelier",          color: "#5D4037", icon: "build",            bgColor: "rgba(93,64,55,0.15)" },
+          incident:   { name: "Incident",          color: "#DC2626", icon: "report",           bgColor: "rgba(220,38,38,0.2)" },
+          accident:   { name: "Accident",          color: "#EA580C", icon: "car_crash",        bgColor: "rgba(234,88,12,0.2)" },
+          work_road:  { name: "Travaux",           color: "#F59E0B", icon: "construction",     bgColor: "rgba(245,158,11,0.2)" },
+          wild_animal:{ name: "Animal dangereux",  color: "#B45309", icon: "pets",             bgColor: "rgba(180,83,9,0.2)" },
+          event:      { name: "Événement",         color: "#7C3AED", icon: "celebration",      bgColor: "rgba(124,58,237,0.2)" },
+          rain:       { name: "Pluie",              color: "#0284C7", icon: "water_drop",       bgColor: "rgba(2,132,199,0.2)" },
+        };
+        return types[type] || { name: "Entreprise", color: "#DC2626", icon: "business", bgColor: "rgba(220,38,38,0.15)" };
+      };
+
+      // Category icon and color mapping for business pins
+      const categoryIconMap = {
+        restaurant: { color: "#E65100", path: "M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z" },
+        hotel: { color: "#1565C0", path: "M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z" },
+        church: { color: "#6A1B9A", path: "M18 12.22V9l-5-2.5V5h2V3h-2V1h-2v2H9v2h2v1.5L6 9v3.22L2 14v8h8v-3c0-1.1.9-2 2-2s2 .9 2 2v3h8v-8l-4-1.78z" },
+        station: { color: "#EF6C00", path: "M19.77 7.23l.01-.01-3.72-3.72L15 4.56l2.11 2.11c-.94.36-1.61 1.26-1.61 2.33a2.5 2.5 0 002.5 2.5c.36 0 .69-.08 1-.21v7.21c0 .55-.45 1-1 1s-1-.45-1-1V14c0-1.1-.9-2-2-2h-1V5c0-1.1-.9-2-2-2H6c-1.1 0-2 .9-2 2v16h10v-7.5h1.5v5a2.5 2.5 0 005 0V9c0-.69-.28-1.32-.73-1.77zM12 10H6V5h6v5z" },
+        pharmacy: { color: "#2E7D32", path: "M21 11h-4V7h-2v4h-4v2h4v4h2v-4h4v-2zm-1-7h-2.18c-.17-.6-.52-1.12-1.01-1.5L18 1.29 16.59 0l-2.28 2.28c-.22-.04-.45-.07-.68-.07h-3.26c-.23 0-.46.03-.68.07L8.41 0 7 1.29l1.19 1.21c-.49.38-.84.9-1.01 1.5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H5V6h14v12z" },
+        hospital: { color: "#C62828", path: "M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z" },
+        school: { color: "#4527A0", path: "M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z" },
+        bank: { color: "#37474F", path: "M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z" },
+        market: { color: "#D84315", path: "M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h1zm-9 4H6v-4h6v4z" },
+        shop: { color: "#AD1457", path: "M18 6h-2c0-2.21-1.79-4-4-4S8 3.79 8 6H6c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-6-2c1.1 0 2 .9 2 2h-4c0-1.1.9-2 2-2zm6 16H6V8h2v2c0 .55.45 1 1 1s1-.45 1-1V8h4v2c0 .55.45 1 1 1s1-.45 1-1V8h2v12z" },
+        cafe: { color: "#795548", path: "M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM2 21h18v-2H2v2z" },
+        bar: { color: "#880E4F", path: "M21 5V3H3v2l8 9v5H6v2h12v-2h-5v-5l8-9zM7.43 7L5.66 5h12.69l-1.78 2H7.43z" },
+        gym: { color: "#BF360C", path: "M20.57 14.86L22 13.43 20.57 12 17 15.57 8.43 7 12 3.43 10.57 2 9.14 3.43 7.71 2 5.57 4.14 4.14 2.71 2.71 4.14l1.43 1.43L2 7.71l1.43 1.43L2 10.57 3.43 12 7 8.43 15.57 17 12 20.57 13.43 22l1.43-1.43L16.29 22l2.14-2.14 1.43 1.43 1.43-1.43-1.43-1.43L22 16.29z" },
+        parking: { color: "#1565C0", path: "M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z" },
+        salon: { color: "#F06292", path: "M9.64 7.64c.23-.5.36-1.05.36-1.64 0-2.21-1.79-4-4-4S2 3.79 2 6s1.79 4 4 4c.59 0 1.14-.13 1.64-.36L10 12l-2.36 2.36C7.14 14.13 6.59 14 6 14c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4c0-.59-.13-1.14-.36-1.64L12 14l7 7h3v-1L9.64 7.64zM6 8c-1.1 0-2-.89-2-2s.9-2 2-2 2 .89 2 2-.9 2-2 2zm0 12c-1.1 0-2-.89-2-2s.9-2 2-2 2 .89 2 2-.9 2-2 2zm6-7.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5.5.22.5.5-.22.5-.5.5zM19 3l-6 6 2 2 7-7V3h-3z" },
+        government: { color: "#37474F", path: "M12 2L2 7v1h20V7L12 2zm0 2.18L18.34 7H5.66L12 4.18zM2 22h20v-2H2v2zm2-3h2v-7H4v7zm4 0h2v-7H8v7zm4 0h2v-7h-2v7zm4 0h2v-7h-2v7zm4 0h2v-7h-2v7z" },
+        police: { color: "#1A237E", path: "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z", iconFill: "#FFD700" },
+        park: { color: "#2E7D32", path: "M17 12h2L12 2 5.05 12H7l-3.9 6h6.91v4h3.98v-4H21l-4-6zM6.79 16l3.56-5.44L8.63 12h1.01L12 7.69 14.36 12h1.01l-1.72-1.44L17.21 16H6.79z" },
+        stadium: { color: "#E65100", img: "assets/icons/soccer-ball.png" },
+        cinema: { color: "#6A1B9A", path: "M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z" },
+        carwash: { color: "#0277BD", path: "M17 5c.83 0 1.5-.67 1.5-1.5 0-1-1.5-2.7-1.5-2.7s-1.5 1.7-1.5 2.7c0 .83.67 1.5 1.5 1.5zm-5 0c.83 0 1.5-.67 1.5-1.5 0-1-1.5-2.7-1.5-2.7S10.5 2.5 10.5 3.5c0 .83.67 1.5 1.5 1.5zM7 5c.83 0 1.5-.67 1.5-1.5C8.5 2.5 7 .8 7 .8S5.5 2.5 5.5 3.5C5.5 4.33 6.17 5 7 5zM5 7v14h14V7H5zm12 12H7V9h10v10z" },
+        workshop: { color: "#5D4037", path: "M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z" },
+        default: { color: "#DC2626", path: "M12 2L4 5v14h16V5L12 2zm0 2.18l6 2.25v11.14H6V6.43l6-2.25zM8 8h2v2H8V8zm4 0h2v2h-2V8zm-4 4h2v2H8v-2zm4 0h2v2h-2v-2zm-4 4h2v2H8v-2zm4 0h2v2h-2v-2z" }
+      };
+
+      // Get category icon info for a business place
+      function getCategoryIcon(categories) {
+        if (!categories || !Array.isArray(categories) || categories.length === 0) return null;
+        for (const cat of categories) {
+          const key = cat.toLowerCase().trim();
+          for (const [mapKey, val] of Object.entries(categoryIconMap)) {
+            if (key.includes(mapKey) || mapKey.includes(key)) return val;
+          }
+        }
+        return null;
+      }
+
+      // Build a pin SVG with given color and icon path (iconFill optional, default #fff). opacity 0-1 for unapproved pins.
+      function buildPinSvg(color, iconPathOrImg, scale, ty, iconFill, opacity) {
+        const fill = iconFill || "#fff";
+        const isImg = typeof iconPathOrImg === "string" && /\.(png|jpg|jpeg|svg|webp)$/i.test(iconPathOrImg);
+        const iconContent = isImg
+          ? `<image href="${iconPathOrImg}" x="0" y="0" width="24" height="24" preserveAspectRatio="xMidYMid meet"/>`
+          : `<path d="${iconPathOrImg}" fill="${fill}" stroke="none"/>`;
+        const opacityStyle = opacity != null && opacity < 1 ? `opacity:${opacity};` : "";
+        return `<div style="position:relative; width:32px; height:40px; ${opacityStyle}">
+          <svg width="32" height="40" viewBox="0 0 32 40" style="filter: drop-shadow(0 2px 5px rgba(0,0,0,0.32));">
+            <path d="M16 0C10.477 0 6 4.477 6 10c0 6 10 18 10 18s10-12 10-18c0-5.523-4.477-10-10-10z" fill="${color}" stroke="#fff" stroke-width="1.5"/>
+            <g transform="translate(16, ${ty}) scale(${scale}) translate(-12, -12)">
+              ${iconContent}
+            </g>
+          </svg>
+        </div>`;
+      }
+
+      // Report pin types: incident (flashing), accident, work_road, wild_animal, event — distinct styles
+      const REPORT_ICONS = {
+        incident: "M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z",
+        accident: "assets/icons/car-accident.png",
+        work_road: "assets/icons/construction.png",
+        wild_animal: "assets/icons/lion-wild-animal.png",
+        event: "M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z",
+        rain: "M12 2c-5.33 4.55-8 8.48-8 11.8 0 4.98 3.8 8.2 8 8.2s8-3.22 8-8.2C20 10.48 17.33 6.55 12 2z"
+      };
+      function buildReportPin(type) {
+        const cfg = {
+          incident: { color: "#DC2626", icon: REPORT_ICONS.incident, cls: "report-pin-incident", flash: true },
+          accident: { color: "#EA580C", icon: REPORT_ICONS.accident, cls: "report-pin-accident report-pin-incident", flash: true },
+          work_road: { color: "#F59E0B", icon: REPORT_ICONS.work_road, cls: "report-pin-work", noBg: true },
+          wild_animal: { color: "#B45309", icon: REPORT_ICONS.wild_animal, cls: "report-pin-animal report-pin-incident", flash: true },
+          event: { color: "#7C3AED", icon: REPORT_ICONS.event, cls: "report-pin-event" },
+          rain: { color: "#0284C7", icon: REPORT_ICONS.rain, cls: "report-pin-rain" }
+        }[type];
+        if (!cfg) return null;
+        const size = cfg.noBg ? 72 : 40;
+        const r = 16;
+        const cx = 20; const cy = 20;
+        const flashColor = (type === "incident" || type === "accident" || type === "wild_animal") ? (cfg.color || "#DC2626") : cfg.color;
+        const flash = cfg.flash ? `<circle class="report-pin-flash" cx="${cx}" cy="${cy}" r="${r+6}" fill="none" stroke="${flashColor}" stroke-width="4"/><circle class="report-pin-flash report-pin-flash-outer" cx="${cx}" cy="${cy}" r="${r+12}" fill="none" stroke="${flashColor}" stroke-width="3"/>` : "";
+        const isImg = typeof cfg.icon === "string" && (cfg.icon.endsWith(".png") || cfg.icon.endsWith(".svg") || cfg.icon.endsWith(".jpg"));
+        const useWhiteFilter = isImg && type !== "work_road";
+        const imgSize = cfg.noBg ? 64 : 24;
+        const imgXY = cfg.noBg ? 4 : 8;
+        const iconContent = isImg
+          ? `<image href="${cfg.icon}" x="${imgXY}" y="${imgXY}" width="${imgSize}" height="${imgSize}" preserveAspectRatio="xMidYMid meet"${useWhiteFilter ? ' style="filter: brightness(0) invert(1);"' : ""}/>`
+          : `<g transform="translate(20,20) scale(0.68) translate(-12,-12)"><path d="${cfg.icon}" fill="#fff"/></g>`;
+        const viewBox = cfg.noBg ? "0 0 72 72" : "0 0 40 40";
+        const circleEl = cfg.noBg ? "" : `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${cfg.color}" stroke="#fff" stroke-width="2"/>`;
+        return `<div class="report-pin ${cfg.cls}" style="position:relative; width:${size}px; height:${size}px;">
+          <svg width="${size}" height="${size}" viewBox="${viewBox}" style="filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));">
+            ${flash}
+            ${circleEl}
+            ${iconContent}
+          </svg>
+        </div>`;
+      }
+
+      const iconFor = (type, categories, pinIcon, status) => {
+        const isApproved = status === "approved";
+        const pinOpacity = isApproved ? 1 : 0.5;
+        const reportHtml = buildReportPin(type);
+        if (reportHtml) {
+          const pinSize = type === "work_road" ? 72 : 40;
+          const anchor = pinSize / 2;
+          const wrapperStyle = pinOpacity < 1 ? `style="opacity:${pinOpacity}"` : "";
+          return L.divIcon({
+            className: "custom-pin report-pin-wrapper" + (isApproved ? "" : " pin-pending"),
+            html: `<div ${wrapperStyle}>${reportHtml}</div>`,
+            iconSize: [pinSize, pinSize],
+            iconAnchor: [anchor, pinSize],
+            popupAnchor: [0, -pinSize]
+          });
+        }
+        let color, iconPath, scale = 0.6, ty = 14;
+
+        if (type === "home") {
+          color = "#1FAF6A";
+          iconPath = "M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z";
+        } else if (type === "airport") {
+          color = "#0A2A43";
+          iconPath = "M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z";
+        } else if (type === "hospital" || type === "clinic") {
+          color = "#C62828";
+          iconPath = "M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z";
+          scale = 0.7; ty = 12;
+        } else if (categoryIconMap[type]) {
+          // Known type with a dedicated icon (restaurant, hotel, school, etc.)
+          const info = categoryIconMap[type];
+          color = info.color;
+          iconPath = info.img || info.path;
+        } else {
+          // Business — use pinIcon first, then fall back to category match
+          const iconKey = pinIcon || null;
+          const chosen = iconKey && categoryIconMap[iconKey] ? categoryIconMap[iconKey] : getCategoryIcon(categories);
+          if (chosen) {
+            color = chosen.color;
+            iconPath = chosen.img || chosen.path;
+          } else {
+            color = "#DC2626";
+            iconPath = categoryIconMap.default.path;
+          }
+        }
+        let iconFill;
+        if (categoryIconMap[type]?.iconFill) iconFill = categoryIconMap[type].iconFill;
+        else if (pinIcon && categoryIconMap[pinIcon]?.iconFill) iconFill = categoryIconMap[pinIcon].iconFill;
+        else if (getCategoryIcon(categories)?.iconFill) iconFill = getCategoryIcon(categories).iconFill;
+
+        return L.divIcon({
+          className: "custom-pin" + (isApproved ? "" : " pin-pending"),
+          html: buildPinSvg(color, iconPath, scale, ty, iconFill, pinOpacity),
+          iconSize: [32, 40],
+          iconAnchor: [16, 40],
+          popupAnchor: [0, -40]
+        });
+      };
+
+      // Purple icon for selected/highlighted place
+      const iconForPurple = (type, categories, pinIcon) => {
+        const reportHtml = buildReportPin(type);
+        if (reportHtml) {
+          const pinSize = type === "work_road" ? 72 : 40;
+          const anchor = pinSize / 2;
+          return L.divIcon({
+            className: "custom-pin report-pin-wrapper report-pin-selected",
+            html: reportHtml,
+            iconSize: [pinSize, pinSize],
+            iconAnchor: [anchor, pinSize],
+            popupAnchor: [0, -pinSize]
+          });
+        }
+        const color = "#9333EA";
+        let iconPath, scale = 0.6, ty = 14;
+
+        if (type === "home") {
+          iconPath = "M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z";
+        } else if (type === "airport") {
+          iconPath = "M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z";
+        } else if (type === "hospital" || type === "clinic") {
+          iconPath = "M19 3H5c-1.1 0-1.99.9-1.99 2L3 19c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4v4z";
+          scale = 0.7; ty = 12;
+        } else if (categoryIconMap[type]) {
+          iconPath = categoryIconMap[type].img || categoryIconMap[type].path;
+        } else {
+          const iconKey = pinIcon || null;
+          const chosen = iconKey && categoryIconMap[iconKey] ? categoryIconMap[iconKey] : getCategoryIcon(categories);
+          iconPath = chosen ? (chosen.img || chosen.path) : categoryIconMap.default.path;
+        }
+        const iconFill = categoryIconMap[type]?.iconFill || (pinIcon && categoryIconMap[pinIcon]?.iconFill) || getCategoryIcon(categories)?.iconFill;
+
+        return L.divIcon({
+          className: "custom-pin",
+          html: buildPinSvg(color, iconPath, scale, ty, iconFill),
+          iconSize: [32, 40],
+          iconAnchor: [16, 40],
+          popupAnchor: [0, -40]
+        });
+      };
+
+      let layer = L.layerGroup().addTo(map);
+      const preview = document.getElementById("preview");
+      
+      function updatePinsVisibility() {
+        const zoom = map.getZoom();
+        const hide = zoom < PINS_MIN_ZOOM;
+        const pane = map.getPane("placePinsPane");
+        if (pane) {
+          pane.style.opacity = hide ? "0" : "1";
+          pane.style.pointerEvents = hide ? "none" : "auto";
+          pane.style.transition = "opacity 0.2s ease";
+        }
+      }
+      let filterCollapsed = true;
+      let selectedMarker = null; // Store the selected marker to restore its icon later
+      
+      // Populate filter dropdowns with commune and quartier data
+      const communeDataMap = {
+        "Lubumbashi": { name: "Commune de Lubumbashi (Centre-ville)", quartiers: ["Makomeno", "Kamalondo", "Golf", "Kenya"] },
+        "Kampemba": { name: "Commune de Kampemba", quartiers: ["Bel-Air", "Salama", "Kafubu"] },
+        "Kenya": { name: "Commune de Kenya", quartiers: ["Lido", "Golf Plateau", "Kabulameshi"] },
+        "Katuba": { name: "Commune de Katuba", quartiers: ["Katuba", "Kisanga", "Lufira"] },
+        "Ruashi": { name: "Commune de Ruashi", quartiers: ["Kalubwe", "Ruashi", "Matoleo"] },
+        "Kamalondo": { name: "Commune de Kamalondo", quartiers: ["Kamalondo", "Kapemba"] },
+        "Annexe": { name: "Commune Annexe", quartiers: ["Kawama", "Luano", "Munua"] }
+      };
+      
+      // Populate filter dropdowns - ensure elements exist first
+      function populateFilters() {
+        const filterCommuneSelect = document.getElementById("filterCommune");
+        const filterNeighborhoodSelect = document.getElementById("filterNeighborhood");
+        const filterTypeSelect = document.getElementById("filterType");
+        
+        if (!filterCommuneSelect) {
+          console.error("filterCommune select not found!");
+          return false;
+        }
+        if (!filterNeighborhoodSelect) {
+          console.error("filterNeighborhood select not found!");
+          return false;
+        }
+        if (!filterTypeSelect) {
+          console.error("filterType select not found!");
+          return false;
+        }
+        
+        console.log("Found all filter elements, populating...");
+        
+        // Clear existing options except placeholder
+        filterCommuneSelect.innerHTML = '<option value="">Toutes</option>';
+        
+        // Add "Other" option
+        const communeOtherOption = document.createElement("option");
+        communeOtherOption.value = "__custom__";
+        communeOtherOption.textContent = "➕ Autre (tapez une nouvelle)";
+        filterCommuneSelect.appendChild(communeOtherOption);
+        
+        // Populate commune filter
+        Object.keys(communeDataMap).forEach(communeKey => {
+          const option = document.createElement("option");
+          option.value = communeKey;
+          option.textContent = communeDataMap[communeKey].name;
+          filterCommuneSelect.appendChild(option);
+        });
+        
+        // Get custom input fields
+        const filterCommuneCustom = document.getElementById("filterCommuneCustom");
+        const filterNeighborhoodCustom = document.getElementById("filterNeighborhoodCustom");
+        
+        console.log("Commune filter populated with", filterCommuneSelect.options.length, "options");
+        
+        // Populate all quartiers initially (grouped by commune)
+        filterNeighborhoodSelect.innerHTML = '<option value="">Tous</option>';
+        
+        // Add "Other" option for quartier
+        const quartierOtherOption = document.createElement("option");
+        quartierOtherOption.value = "__custom__";
+        quartierOtherOption.textContent = "➕ Autre (tapez un nouveau)";
+        filterNeighborhoodSelect.appendChild(quartierOtherOption);
+        
+        Object.keys(communeDataMap).forEach(communeKey => {
+          const commune = communeDataMap[communeKey];
+          const optgroup = document.createElement("optgroup");
+          optgroup.label = commune.name;
+          commune.quartiers.forEach(quartier => {
+            const option = document.createElement("option");
+            option.value = quartier;
+            option.textContent = quartier;
+            optgroup.appendChild(option);
+          });
+          filterNeighborhoodSelect.appendChild(optgroup);
+        });
+        
+        // Update neighborhood filter when commune changes
+        filterCommuneSelect.onchange = function() {
+          if (this.value === "__custom__") {
+            filterCommuneCustom.style.display = "block";
+            filterCommuneCustom.value = "";
+            filterCommuneCustom.focus();
+          } else {
+            filterCommuneCustom.style.display = "none";
+            filterCommuneCustom.value = "";
+          }
+          
+          const selectedCommune = this.value === "__custom__" ? filterCommuneCustom.value.trim() : this.value;
+          
+          // Update quartier dropdown - always show all quartiers with "Other" option
+          filterNeighborhoodSelect.innerHTML = '<option value="">Tous</option>';
+          const quartierOtherOption2 = document.createElement("option");
+          quartierOtherOption2.value = "__custom__";
+          quartierOtherOption2.textContent = "➕ Autre (tapez un nouveau)";
+          filterNeighborhoodSelect.appendChild(quartierOtherOption2);
+          
+          Object.keys(communeDataMap).forEach(communeKey => {
+            const commune = communeDataMap[communeKey];
+            const optgroup = document.createElement("optgroup");
+            optgroup.label = commune.name;
+            commune.quartiers.forEach(quartier => {
+              const option = document.createElement("option");
+              option.value = quartier;
+              option.textContent = quartier;
+              if (communeKey === selectedCommune && selectedCommune !== "__custom__") {
+                option.style.fontWeight = 'bold';
+              }
+              optgroup.appendChild(option);
+            });
+            filterNeighborhoodSelect.appendChild(optgroup);
+          });
+          
+          updateActiveFilters();
+          render();
+        };
+        
+        // Handle quartier custom input toggle
+        filterNeighborhoodSelect.onchange = function() {
+          if (this.value === "__custom__") {
+            filterNeighborhoodCustom.style.display = "block";
+            filterNeighborhoodCustom.value = "";
+            filterNeighborhoodCustom.focus();
+          } else {
+            filterNeighborhoodCustom.style.display = "none";
+            filterNeighborhoodCustom.value = "";
+          }
+          updateActiveFilters();
+          render();
+        };
+        
+        // Handle custom input changes
+        filterCommuneCustom.addEventListener("input", () => {
+          updateActiveFilters();
+          render();
+        });
+        
+        filterNeighborhoodCustom.addEventListener("input", () => {
+          updateActiveFilters();
+          render();
+        });
+        
+        // Type filter change
+        filterTypeSelect.onchange = function() {
+          updateActiveFilters();
+          render();
+        };
+        
+        console.log("All filters initialized successfully");
+        return true;
+      }
+      
+      // Wait for DOM to be ready, then populate filters
+      function initFilters() {
+        if (populateFilters()) {
+          console.log("Filters initialized successfully");
+        } else {
+          console.warn("Filters not ready, retrying...");
+          setTimeout(initFilters, 100);
+        }
+      }
+      
+      // Start initialization
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFilters);
+      } else {
+        initFilters();
+      }
+
+      // Toggle side panel
+      const sidePanel = document.getElementById("sidePanel");
+      const togglePanelBtn = document.getElementById("togglePanelBtn");
+      const togglePanelIcon = document.getElementById("togglePanelIcon");
+      const searchInput = document.getElementById("searchInput");
+      const searchBtn = document.getElementById("searchBtn");
+      const searchResults = document.getElementById("searchResults");
+      const categoriesContainer = document.getElementById("categoriesContainer");
+      let panelOpen = true;
+      let selectedPlaceId = null;
+      let selectedCategory = null;
+      
+      // User role checks (defined early for use throughout)
+      // Try API first, fallback to localStorage
+      let currentUser = null;
+      if (window.TMAPI && window.TMAPI.USE_BACKEND && window.TMAPI.Auth) {
+        currentUser = window.TMAPI.Auth.getCurrentUser();
+      } else {
+        currentUser = TM.getCurrentUser();
+      }
+      const isInspector = false; // inspector role removed
+      const isAdmin = currentUser && currentUser.role === "admin";
+      const canAddPlace = isAdmin;
+      
+      // Home button: always goes to landing page (index.html)
+      const gmHomeBtn = document.getElementById("gmHomeBtn");
+      if (gmHomeBtn) {
+        gmHomeBtn.href = "index.html";
+        gmHomeBtn.title = "Accueil";
+        gmHomeBtn.setAttribute("aria-label", "Accueil");
+      }
+
+      // Close button: if connected → account/dashboard; if not → main page
+      const gmClosePreviewBtn = document.getElementById("gmClosePreviewBtn");
+      if (gmClosePreviewBtn) {
+        const closeHref = !currentUser ? "index.html"
+          : isAdmin ? "admin/index.html"
+          : "dashboard/index.html";
+        const closeLabel = currentUser ? "Mon compte" : "Accueil";
+        gmClosePreviewBtn.title = closeLabel;
+        gmClosePreviewBtn.setAttribute("aria-label", closeLabel);
+        gmClosePreviewBtn.addEventListener("click", () => {
+          window.location.href = closeHref;
+        });
+      }
+      
+      function setPanelOpen(open) {
+        panelOpen = open;
+        sidePanel.classList.toggle("open", panelOpen);
+        document.body.classList.toggle("panel-open", panelOpen);
+        togglePanelIcon.textContent = panelOpen ? "close" : "menu";
+      }
+
+      // On phone/mobile: start with panel closed so map is visible first
+      const isPhoneView = window.innerWidth <= 768;
+      setPanelOpen(!isPhoneView);
+      togglePanelBtn.addEventListener("click", () => {
+        setPanelOpen(!panelOpen);
+        if (panelOpen) {
+          searchInput.focus();
+        } else {
+          clearPlaceSelection();
+        }
+      });
+
+      // === Custom Google Maps-style Controls ===
+      // Hamburger opens side panel
+      const gmHamburger = document.getElementById("gmHamburger");
+      if (gmHamburger) {
+        gmHamburger.addEventListener("click", () => {
+          setPanelOpen(!panelOpen);
+          if (panelOpen) searchInput.focus();
+        });
+      }
+
+      // Zoom buttons
+      const gmZoomIn = document.getElementById("gmZoomIn");
+      const gmZoomOut = document.getElementById("gmZoomOut");
+      if (gmZoomIn) gmZoomIn.addEventListener("click", () => map.zoomIn());
+      if (gmZoomOut) gmZoomOut.addEventListener("click", () => map.zoomOut());
+
+      // City legend: fly map to selected city
+      document.querySelectorAll(".cityLegendBtn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const lat = parseFloat(btn.dataset.lat);
+          const lng = parseFloat(btn.dataset.lng);
+          const zoom = parseInt(btn.dataset.zoom, 10) || 12;
+          if (!isNaN(lat) && !isNaN(lng)) {
+            map.flyTo([lat, lng], zoom, { duration: 0.8 });
+            // On phone: close panel immediately after selecting city so user sees the map
+            if (window.innerWidth <= 768 && panelOpen) {
+              setPanelOpen(false);
+            }
+          }
+        });
+      });
+
+      function showSatelliteLayer() {
+        if (map.hasLayer(street)) map.removeLayer(street);
+        if (map.hasLayer(satelliteClear)) map.removeLayer(satelliteClear);
+        if (satelliteWithLabels && map.hasLayer(satelliteWithLabels)) map.removeLayer(satelliteWithLabels);
+        const useLabels = satelliteMode === "labels" && satelliteWithLabels;
+        const layerToAdd = useLabels ? satelliteWithLabels : satelliteClear;
+        layerToAdd.addTo(map);
+        map.invalidateSize();
+        if (useLabels && satelliteWithLabels && satelliteWithLabels.getMapboxMap) {
+          const glMap = satelliteWithLabels.getMapboxMap();
+          if (glMap && glMap.resize) {
+            setTimeout(() => { glMap.resize(); map.fire("moveend"); }, 50);
+          }
+        } else {
+          setTimeout(() => map.fire("moveend"), 50);
+        }
+      }
+      function showStreetLayer() {
+        if (map.hasLayer(satelliteClear)) map.removeLayer(satelliteClear);
+        if (satelliteWithLabels && map.hasLayer(satelliteWithLabels)) map.removeLayer(satelliteWithLabels);
+        street.addTo(map);
+        map.invalidateSize();
+        const glMap = street.getMapboxMap && street.getMapboxMap();
+        if (glMap && glMap.resize) {
+          setTimeout(() => { glMap.resize(); map.fire("moveend"); }, 50);
+        }
+      }
+
+      // Update logo color by map layer (green=street/light, white=satellite/dark)
+      function updateMapLogoLayer() {
+        const wrap = document.getElementById("mapLogoWrap");
+        if (!wrap) return;
+        wrap.classList.remove("tm-map-layer-street", "tm-map-layer-satellite", "tm-map-layer-dark");
+        if (currentLayer === "satellite") wrap.classList.add("tm-map-layer-satellite");
+        else if (isNight) wrap.classList.add("tm-map-layer-dark");
+        else wrap.classList.add("tm-map-layer-street");
+      }
+      updateMapLogoLayer();
+
+      // Layer toggle (street <-> satellite)
+      const gmLayerToggle = document.getElementById("gmLayerToggle");
+      const gmSatelliteClearBtn = document.getElementById("gmSatelliteClearBtn");
+      if (gmLayerToggle) {
+        gmLayerToggle.addEventListener("click", () => {
+          if (currentLayer === "street") {
+            showSatelliteLayer();
+            currentLayer = "satellite";
+            gmLayerToggle.querySelector(".material-icons").textContent = "map";
+            gmLayerToggle.title = "Vue carte";
+            if (gmSatelliteClearBtn) {
+              gmSatelliteClearBtn.style.display = satelliteWithLabels ? "" : "none";
+              gmSatelliteClearBtn.classList.toggle("active", satelliteMode === "clear");
+              gmSatelliteClearBtn.title = satelliteMode === "clear" ? "Vue claire (actuelle)" : "Afficher les noms de rues";
+              gmSatelliteClearBtn.querySelector(".material-icons").textContent = satelliteMode === "clear" ? "high_quality" : "label";
+            }
+          } else {
+            showStreetLayer();
+            currentLayer = "street";
+            gmLayerToggle.querySelector(".material-icons").textContent = "layers";
+            gmLayerToggle.title = "Vue satellite";
+            if (gmSatelliteClearBtn) gmSatelliteClearBtn.style.display = "none";
+          }
+          updateMapLogoLayer();
+        });
+      }
+      // Satellite clear quality button (visible only in satellite mode; toggles clear vs labels)
+      if (gmSatelliteClearBtn) {
+        gmSatelliteClearBtn.addEventListener("click", () => {
+          if (currentLayer !== "satellite") return;
+          if (!satelliteWithLabels) return; // Only one option, no toggle
+          satelliteMode = satelliteMode === "clear" ? "labels" : "clear";
+          showSatelliteLayer();
+          gmSatelliteClearBtn.classList.toggle("active", satelliteMode === "clear");
+          gmSatelliteClearBtn.title = satelliteMode === "clear" ? "Vue claire (actuelle)" : "Afficher les noms de rues";
+          gmSatelliteClearBtn.querySelector(".material-icons").textContent = satelliteMode === "clear" ? "high_quality" : "label";
+        });
+      }
+
+      // My location button
+      const gmMyLocation = document.getElementById("gmMyLocation");
+      if (gmMyLocation) {
+        gmMyLocation.addEventListener("click", () => {
+          if (!navigator.geolocation) {
+            alert("La géolocalisation n'est pas disponible.");
+            return;
+          }
+          gmMyLocation.querySelector(".material-icons").textContent = "gps_not_fixed";
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              const { latitude, longitude } = pos.coords;
+              map.flyTo([latitude, longitude], 17, { duration: 1.0 });
+              // Add blue dot for current location
+              const locMarker = L.circleMarker([latitude, longitude], {
+                radius: 8, fillColor: "#4285f4", fillOpacity: 1,
+                color: "#fff", weight: 3, opacity: 1
+              }).addTo(map);
+              // Remove after 10s
+              setTimeout(() => map.removeLayer(locMarker), 10000);
+              gmMyLocation.querySelector(".material-icons").textContent = "my_location";
+            },
+            (err) => {
+              console.error("Geolocation error:", err);
+              alert("Impossible d'obtenir votre position.");
+              gmMyLocation.querySelector(".material-icons").textContent = "my_location";
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+          );
+        });
+      }
+      
+      // Search functionality
+      function matchesQuery(p, q) {
+        if (!q) return true;
+        const s = q.toLowerCase().trim();
+        if (!s) return true;
+        if (p.tropicalCode && p.tropicalCode.toLowerCase() === s) return true;
+        return (
+          String(p.name).toLowerCase().includes(s) ||
+          String(p.commune).toLowerCase().includes(s) ||
+          String(p.neighborhood).toLowerCase().includes(s) ||
+          (p.landmark && String(p.landmark).toLowerCase().includes(s))
+        );
+      }
+      
+      // Check if query is a TM code (format: TM-LSH-XXXXXX)
+      function isTMCode(query) {
+        const trimmed = query.trim().toUpperCase();
+        return /^TM-[A-Z0-9]+-\d+$/.test(trimmed);
+      }
+      
+      // Show full place details in side panel
+      function showPlaceDetails(place) {
+        if (!place) {
+          console.error("Place missing:", place);
+          return;
+        }
+        
+        // Handle both API format (location_lat, location_lng) and localStorage format (location.lat, location.lng)
+        let lat, lng;
+        if (place.location_lat && place.location_lng) {
+          lat = parseFloat(place.location_lat);
+          lng = parseFloat(place.location_lng);
+        } else if (place.location && typeof place.location.lat === "number" && typeof place.location.lng === "number") {
+          lat = place.location.lat;
+          lng = place.location.lng;
+        } else {
+          console.error("Place location missing or invalid:", place);
+          alert("Ce lieu n'a pas de localisation valide.");
+          return;
+        }
+        
+        if (isNaN(lat) || isNaN(lng)) {
+          console.error("Place has invalid location coordinates:", place.id, place.name, { lat, lng });
+          alert("Ce lieu n'a pas de localisation valide.");
+          return;
+        }
+        
+        // Normalize location for consistent use
+        place.location = { lat, lng };
+        
+        console.log("Showing place details:", place.name, place.tropicalCode || place.tropical_code);
+        
+        // Show clear selection button in header
+        const clearSelectionBtn = document.getElementById("clearSelectionBtn");
+        if (clearSelectionBtn) {
+          clearSelectionBtn.style.display = "flex";
+        }
+        
+        // Open side panel if closed
+        if (!panelOpen) {
+          setPanelOpen(true);
+        }
+        
+        // Zoom and center map with smooth animation
+        map.flyTo([lat, lng], 18, {
+          duration: 1.0,
+          easeLinearity: 0.25
+        });
+        
+        // Find and highlight the marker - change icon to purple; restore others (including incident pins)
+        layer.eachLayer((marker) => {
+          if (marker.options && marker.options.placeId === place.id && !marker.options.isIncident) {
+            selectedMarker = marker;
+            marker.setIcon(iconForPurple(place.type, place.categories, place.pinIcon || place.pin_icon));
+            marker.setZIndexOffset(1000);
+            marker.openPopup();
+          } else {
+            marker.setZIndexOffset(0);
+            if (marker.options && (marker.options.isIncident || marker.options.isUrlIncident)) {
+              const inc = marker.options.placeId ? allIncidents.find(i => i.id === marker.options.placeId) : null;
+              const incType = inc ? inc.type : "incident";
+              marker.setIcon(iconFor(incType, [], null, "approved"));
+            }
+          }
+        });
+        
+        // Build detailed HTML
+        const photos = Array.isArray(place.photos) ? place.photos : [];
+        const categories = Array.isArray(place.categories) ? place.categories : [];
+        const tropicalCode = place.tropicalCode || place.tropical_code || "N/A";
+        
+        // Detect platform for directions link
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const dest = `${lat},${lng}`;
+        const directionsUrl = isIOS 
+          ? `https://maps.apple.com/?daddr=${encodeURIComponent(dest)}&dirflg=d`
+          : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}`;
+        const directionsText = isIOS ? "Itinéraire (Apple Maps)" : "Itinéraire (Google Maps)";
+        
+        // WhatsApp share
+        const placeUrl = `${window.location.origin}/place.html?id=${encodeURIComponent(place.id)}`;
+        const whatsappMsg = `Here is my Tropical Map address: ${placeUrl} | Code: ${tropicalCode}`;
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappMsg)}`;
+        
+        // Photos section - always show, with message if no photos
+        let photosHTML = `
+          <div style="margin-top:16px">
+            <div style="font-weight:600; font-size:14px; margin-bottom:10px; display:flex; align-items:center; gap:6px; color: var(--navy)">
+              <span class="material-icons" style="font-size: 20px;">photo_library</span>
+              Photos
+            </div>
+        `;
+        
+        if (photos.length > 0) {
+          photosHTML += `
+            <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap:8px">
+              ${photos.map(photo => `
+                <div style="aspect-ratio:1; border-radius:8px; overflow:hidden; background:var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.1)">
+                  <img src="${escapeHtml(photo)}" alt="Photo" style="width:100%; height:100%; object-fit:cover" />
+                </div>
+              `).join("")}
+            </div>
+          `;
+        } else {
+          photosHTML += `
+            <div style="text-align:center; padding:30px 20px; background: rgba(10,42,67,.02); border-radius:12px; border:2px dashed var(--border)">
+              <span class="material-icons" style="font-size: 48px; color: rgba(10,42,67,.25); display:block; margin-bottom:8px">image_not_supported</span>
+              <div class="muted" style="font-size:13px; font-weight:500">Aucune photo disponible</div>
+            </div>
+          `;
+        }
+        photosHTML += `</div>`;
+        
+        let categoriesHTML = "";
+        if (categories.length > 0) {
+          categoriesHTML = `
+            <div style="margin-top:12px">
+              <div style="font-weight:600; font-size:13px; margin-bottom:8px; display:flex; align-items:center; gap:6px">
+                <span class="material-icons" style="font-size: 18px;">category</span>
+                Catégories
+              </div>
+              <div style="display:flex; gap:6px; flex-wrap:wrap">
+                ${categories.map(cat => `
+                  <span class="badge" style="font-size:11px; padding:6px 10px; background: rgba(31,175,106,0.1); color: var(--green)">
+                    ${escapeHtml(cat)}
+                  </span>
+                `).join("")}
+              </div>
+            </div>
+          `;
+        }
+        
+        // Additional details section
+        let detailsHTML = `
+          <div style="margin-top:16px; padding-top:16px; border-top: 1px solid var(--border)">
+            <div style="font-weight:600; font-size:14px; margin-bottom:12px; display:flex; align-items:center; gap:6px; color: var(--navy)">
+              <span class="material-icons" style="font-size: 20px;">info</span>
+              Informations détaillées
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px">
+              <div>
+                <div style="font-size:11px; font-weight:600; color: rgba(10,42,67,0.6); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px">Type</div>
+                <div style="font-size:14px; font-weight:500; color: var(--navy)">
+                  ${getTypeInfo(place.type).name}
+                </div>
+              </div>
+              <div>
+                <div style="font-size:11px; font-weight:600; color: rgba(10,42,67,0.6); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px">Commune</div>
+                <div style="font-size:14px; font-weight:500; color: var(--navy)">${escapeHtml(place.commune)}</div>
+              </div>
+              <div>
+                <div style="font-size:11px; font-weight:600; color: rgba(10,42,67,0.6); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px">Quartier</div>
+                <div style="font-size:14px; font-weight:500; color: var(--navy)">${escapeHtml(place.neighborhood)}</div>
+              </div>
+              ${place.address ? `
+                <div>
+                  <div style="font-size:11px; font-weight:600; color: rgba(10,42,67,0.6); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px">Adresse</div>
+                  <div style="font-size:14px; font-weight:500; color: var(--navy)">
+                    <span class="material-icons" style="font-size:14px; vertical-align:middle; margin-right:4px">place</span>${escapeHtml(place.address)}
+                  </div>
+                </div>
+              ` : ""}
+              ${place.landmark ? `
+                <div>
+                  <div style="font-size:11px; font-weight:600; color: rgba(10,42,67,0.6); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px">Repère</div>
+                  <div style="font-size:14px; font-weight:500; color: var(--navy)">${escapeHtml(place.landmark)}</div>
+                </div>
+              ` : ""}
+              <div>
+                <div style="font-size:11px; font-weight:600; color: rgba(10,42,67,0.6); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px">Code Tropical Map</div>
+                <div style="font-size:16px; font-weight:700; color: var(--green); font-family: monospace; letter-spacing:1px">${escapeHtml(tropicalCode)}</div>
+              </div>
+              ${place.phone ? `
+                <div>
+                  <div style="font-size:11px; font-weight:600; color: rgba(10,42,67,0.6); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px">Téléphone</div>
+                  <a href="tel:${escapeHtml(place.phone)}" style="font-size:14px; font-weight:500; color: var(--green); text-decoration: none;">
+                    ${escapeHtml(place.phone)}
+                  </a>
+                </div>
+              ` : ""}
+              <div>
+                <div style="font-size:11px; font-weight:600; color: rgba(10,42,67,0.6); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px">Coordonnées GPS</div>
+                <div style="font-size:12px; font-weight:500; color: rgba(10,42,67,0.7); font-family: monospace">
+                  ${lat.toFixed(6)}, ${lng.toFixed(6)}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        searchResults.innerHTML = `
+          <div style="background: white; border-radius: 12px; padding: 0; overflow: hidden; border: 2px solid var(--green); box-shadow: 0 4px 16px rgba(31,175,106,0.15);">
+            <!-- Header -->
+            <div style="padding: 16px; background: linear-gradient(135deg, rgba(31,175,106,0.1) 0%, rgba(31,175,106,0.05) 100%); border-bottom: 1px solid var(--border); position: relative">
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px">
+                <span class="badge" style="font-size:11px; padding:4px 8px; background: ${getTypeInfo(place.type).bgColor}; color: ${getTypeInfo(place.type).color}">
+                  ${getTypeInfo(place.type).name}
+                </span>
+                <span class="badge ${place.status === "approved" ? "approved" : place.status === "rejected" ? "" : ""}" style="font-size:11px; padding:4px 8px; background: ${place.status === "approved" ? "rgba(31,175,106,.15)" : place.status === "rejected" ? "rgba(220,38,38,.15)" : "rgba(245,158,11,.15)"}; color: ${place.status === "approved" ? "#1FAF6A" : place.status === "rejected" ? "#DC2626" : "#F59E0B"}">
+                  ${place.status === "approved" ? "Approuvé" : place.status === "rejected" ? "Rejeté" : "En attente"}
+                </span>
+              </div>
+              <div style="font-weight:900; font-size:20px; letter-spacing:-.02em; display:flex; align-items:center; gap:8px; margin-bottom:6px; padding-right: 40px">
+                <span class="material-icons" style="font-size: 24px; color: ${getTypeInfo(place.type).color}">${getTypeInfo(place.type).icon}</span>
+                ${escapeHtml(place.name)}
+              </div>
+              <div class="muted" style="font-size:13px; margin-bottom:4px; padding-right: 40px">
+                <span class="material-icons" style="font-size: 16px; vertical-align: middle;">location_on</span>
+                ${escapeHtml(place.neighborhood)} • ${escapeHtml(place.commune)}
+              </div>
+            </div>
+            
+            <!-- Content -->
+            <div style="padding: 16px;">
+              ${photosHTML}
+              ${categoriesHTML}
+              ${detailsHTML}
+              
+              <!-- Action Buttons -->
+              <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px">
+                <div style="display:flex; gap:8px; flex-wrap:wrap">
+                  <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn yellow small" style="flex:1; min-width:80px; padding:10px 12px; font-size:12px; display:flex; align-items:center; justify-content:center; gap:6px">
+                    <span class="material-icons" style="font-size: 18px;">directions</span>
+                    Itinéraire
+                  </a>
+                  <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="btn secondary small" style="flex:1; min-width:80px; padding:10px 12px; font-size:12px; display:flex; align-items:center; justify-content:center; gap:6px">
+                    <span class="material-icons" style="font-size: 18px;">share</span>
+                    Partager
+                  </a>
+                </div>
+                ${(isInspector || isAdmin) ? `
+                ${(place.status === "pending" || place.status === "pending_review") ? `
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px">
+                  <button id="approvePinBtn" type="button" class="btn primary small" style="flex:1; min-width:80px; padding:10px 12px; font-size:12px; display:flex; align-items:center; justify-content:center; gap:6px; background:#1FAF6A; border-color:#1FAF6A">
+                    <span class="material-icons" style="font-size: 18px;">check_circle</span>
+                    Approuver
+                  </button>
+                  <button id="rejectPinBtn" type="button" class="btn secondary small" style="flex:1; min-width:80px; padding:10px 12px; font-size:12px; display:flex; align-items:center; justify-content:center; gap:6px; color:#DC2626; border-color:#DC2626">
+                    <span class="material-icons" style="font-size: 18px;">cancel</span>
+                    Rejeter
+                  </button>
+                </div>
+                ` : ""}
+                <div style="display:flex; gap:8px; flex-wrap:wrap">
+                  <button id="movePinBtn" type="button" class="btn secondary small" style="flex:1; min-width:80px; padding:10px 12px; font-size:12px; display:flex; align-items:center; justify-content:center; gap:6px">
+                    <span class="material-icons" style="font-size: 18px;">place</span>
+                    Déplacer
+                  </button>
+                  <button id="deletePinBtn" type="button" class="btn secondary small" style="flex:1; min-width:80px; padding:10px 12px; font-size:12px; display:flex; align-items:center; justify-content:center; gap:6px; color:#DC2626; border-color:#DC2626">
+                    <span class="material-icons" style="font-size: 18px;">delete</span>
+                    Supprimer
+                  </button>
+                </div>
+                ` : ""}
+              </div>
+              
+              <a href="place.html?id=${encodeURIComponent(place.id)}" class="btn primary small" style="width:100%; margin-top:8px; padding:10px; text-align:center; font-size:13px; display:flex; align-items:center; justify-content:center; gap:6px">
+                <span class="material-icons" style="font-size: 18px;">visibility</span>
+                Voir tous les détails
+              </a>
+            </div>
+          </div>
+        `;
+        
+        // Scroll to top of results
+        if (searchResults) {
+          searchResults.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          console.error("searchResults element not found!");
+        }
+        
+        // Approve pin (inspector/admin, pending places only)
+        const approvePinBtn = document.getElementById("approvePinBtn");
+        if ((isInspector || isAdmin) && approvePinBtn) {
+          approvePinBtn.addEventListener("click", async () => {
+            try {
+              let updated;
+              if (window.TMAPI && window.TMAPI.Places) {
+                const res = await window.TMAPI.Places.approve(place.id);
+                updated = res || (await window.TMAPI.Places.getAll()).find(x => x.id === place.id);
+              } else {
+                updated = TM.inspectorApprove({ id: place.id });
+              }
+              TM.toast("Lieu approuvé", "success");
+              if (updated) showPlaceDetails(updated);
+              await render();
+              await renderSearchResults();
+            } catch (err) {
+              TM.toast(err?.message || "Erreur", "error");
+            }
+          });
+        }
+        // Reject pin (inspector/admin, pending places only)
+        const rejectPinBtn = document.getElementById("rejectPinBtn");
+        if ((isInspector || isAdmin) && rejectPinBtn) {
+          rejectPinBtn.addEventListener("click", async () => {
+            const noteInput = prompt("Note de rejet (optionnel):");
+            if (noteInput === null) return;
+            const note = String(noteInput || "").trim() || "Rejeté";
+            try {
+              let updated;
+              if (window.TMAPI && window.TMAPI.Places) {
+                const res = await window.TMAPI.Places.reject(place.id, { note });
+                updated = res || (await window.TMAPI.Places.getAll()).find(x => x.id === place.id);
+              } else {
+                updated = TM.inspectorReject({ id: place.id, note });
+              }
+              TM.toast("Lieu rejeté", "success");
+              if (updated) showPlaceDetails(updated);
+              await render();
+              await renderSearchResults();
+            } catch (err) {
+              TM.toast(err?.message || "Erreur", "error");
+            }
+          });
+        }
+        // Delete pin (inspector/admin only)
+        const deletePinBtn = document.getElementById("deletePinBtn");
+        if ((isInspector || isAdmin) && deletePinBtn) {
+          deletePinBtn.addEventListener("click", async () => {
+            if (!confirm(`Supprimer « ${escapeHtml(place.name)} » (${place.tropicalCode || place.id}) ?`)) return;
+            try {
+              if (window.TMAPI && window.TMAPI.Places) {
+                await window.TMAPI.Places.delete(place.id);
+              } else {
+                TM.deletePlaceOwner(place.id);
+              }
+              TM.toast("Lieu supprimé", "success");
+              selectedPlaceId = null;
+              selectedMarker = null;
+              await render();
+              await renderSearchResults();
+              searchResults.innerHTML = "";
+            } catch (err) {
+              TM.toast(err?.message || "Erreur lors de la suppression", "error");
+            }
+          });
+        }
+
+        // Move pin (inspector/admin only)
+        const moveBtn = document.getElementById("movePinBtn");
+        if ((isInspector || isAdmin) && moveBtn) {
+          let moveMode = false;
+          let dragHandler = null;
+          moveBtn.addEventListener("click", () => {
+            if (!selectedMarker) {
+              alert("Aucun pin sélectionné.");
+              return;
+            }
+            moveMode = !moveMode;
+            if (moveMode) {
+              moveBtn.textContent = "Valider la position";
+              if (selectedMarker.dragging) selectedMarker.dragging.enable();
+              dragHandler = (evt) => {
+                const newPos = evt.target.getLatLng();
+                try {
+                  TM.updatePlaceLocation(place.id, { lat: newPos.lat, lng: newPos.lng });
+                  render();
+                  const updated = TM.getPlaceById(place.id);
+                  if (updated) showPlaceDetails(updated);
+                } catch (err) {
+                  alert(err?.message || "Erreur lors de la mise à jour de la position.");
+                }
+              };
+              selectedMarker.on("dragend", dragHandler);
+            } else {
+              moveBtn.textContent = "Déplacer le pin";
+              if (selectedMarker.dragging) selectedMarker.dragging.disable();
+              if (dragHandler) selectedMarker.off("dragend", dragHandler);
+            }
+          });
+        }
+
+        console.log("Place details HTML inserted, searchResults content length:", searchResults ? searchResults.innerHTML.length : 0);
+      }
+
+      // Show incident/report details in side panel (same as place details)
+      function showIncidentDetails(inc, marker) {
+        if (!inc) return;
+        const lat = parseFloat(inc.lat);
+        const lng = parseFloat(inc.lng);
+        if (isNaN(lat) || isNaN(lng)) return;
+
+        // Restore previously selected marker icon (place or incident)
+        if (selectedMarker) {
+          if (selectedMarker.options?.isIncident || selectedMarker.options?.isUrlIncident) {
+            const prevInc = selectedMarker.options?.placeId ? allIncidents.find(i => i.id === selectedMarker.options.placeId) : null;
+            const prevType = prevInc ? prevInc.type : "incident";
+            selectedMarker.setIcon(iconFor(prevType, [], null, "approved"));
+          } else {
+            const prevPlace = allPlaces.find(p => p.id === selectedMarker.options?.placeId);
+            if (prevPlace) selectedMarker.setIcon(iconFor(prevPlace.type, prevPlace.categories, prevPlace.pinIcon || prevPlace.pin_icon, prevPlace.status));
+          }
+          selectedMarker.setZIndexOffset(0);
+        }
+        selectedPlaceId = null;
+        selectedMarker = marker || null;
+
+        const clearSelectionBtn = document.getElementById("clearSelectionBtn");
+        if (clearSelectionBtn) clearSelectionBtn.style.display = "flex";
+        if (!panelOpen) setPanelOpen(true);
+        if (preview) { preview.style.display = "none"; preview.innerHTML = ""; }
+
+        map.flyTo([lat, lng], Math.max(map.getZoom(), 16), { duration: 0.6 });
+        if (marker) {
+          marker.setIcon(iconForPurple(inc.type, [], null));
+          marker.setZIndexOffset(1000);
+        }
+
+        const typeInfo = getTypeInfo(inc.type) || { name: inc.type, color: "#DC2626", icon: "warning", bgColor: "rgba(220,38,38,0.15)" };
+        const code = inc.tropical_code || inc.tropicalCode || "—";
+        const desc = escapeHtml(inc.description || "");
+        const date = inc.created_at ? new Date(inc.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) : "—";
+        const reporter = inc.reporter_email ? escapeHtml(inc.reporter_email) : "—";
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const dest = `${lat},${lng}`;
+        const directionsUrl = isIOS ? `https://maps.apple.com/?daddr=${encodeURIComponent(dest)}&dirflg=d` : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}`;
+        const directionsText = isIOS ? "Itinéraire (Apple Maps)" : "Itinéraire (Google Maps)";
+
+        searchResults.innerHTML = `
+          <div style="background: white; border-radius: 12px; padding: 0; overflow: hidden; border: 2px solid ${typeInfo.color}; box-shadow: 0 4px 16px rgba(0,0,0,0.12);">
+            <div style="padding: 16px; background: linear-gradient(135deg, ${typeInfo.bgColor} 0%, rgba(255,255,255,0.5) 100%); border-bottom: 1px solid var(--border);">
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px">
+                <span class="badge" style="font-size:11px; padding:4px 8px; background: ${typeInfo.bgColor}; color: ${typeInfo.color}">${escapeHtml(typeInfo.name)}</span>
+                <span class="badge" style="font-size:11px; padding:4px 8px; background: rgba(31,175,106,.15); color: #1FAF6A">Approuvé</span>
+              </div>
+              <div style="font-weight:900; font-size:20px; display:flex; align-items:center; gap:8px; margin-bottom:6px">
+                <span class="material-icons" style="font-size: 24px; color: ${typeInfo.color}">${typeInfo.icon}</span>
+                ${escapeHtml(typeInfo.name)}
+              </div>
+              <div class="code" style="font-size:14px; font-weight:700; color: ${typeInfo.color}; font-family: monospace">${escapeHtml(code)}</div>
+            </div>
+            <div style="padding: 16px;">
+              <div style="margin-bottom:16px">
+                <div style="font-size:11px; font-weight:600; color: rgba(10,42,67,0.6); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px">Description</div>
+                <div style="font-size:14px; line-height:1.6; color: var(--navy)">${desc}</div>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:10px; font-size:13px">
+                <div><span style="font-weight:600; color: rgba(10,42,67,0.7)">Date</span> ${escapeHtml(date)}</div>
+                ${reporter !== "—" ? `<div><span style="font-weight:600; color: rgba(10,42,67,0.7)">Signalé par</span> ${reporter}</div>` : ""}
+                <div><span style="font-weight:600; color: rgba(10,42,67,0.7)">Coordonnées</span> ${lat.toFixed(6)}, ${lng.toFixed(6)}</div>
+                ${inc.location ? `<div><span style="font-weight:600; color: rgba(10,42,67,0.7)">Lieu</span> ${escapeHtml(inc.location)}</div>` : ""}
+                ${inc.contact ? `<div><span style="font-weight:600; color: rgba(10,42,67,0.7)">Contact</span> <a href="tel:${escapeHtml(inc.contact)}">${escapeHtml(inc.contact)}</a></div>` : ""}
+              </div>
+              <a href="${directionsUrl}" target="_blank" rel="noopener noreferrer" class="btn yellow small" style="margin-top:16px; width:100%; padding:10px 12px; font-size:13px; display:flex; align-items:center; justify-content:center; gap:6px">
+                <span class="material-icons" style="font-size: 18px;">directions</span> ${directionsText}
+              </a>
+            </div>
+          </div>
+        `;
+        if (searchResults) searchResults.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      
+      async function renderSearchResults() {
+        const query = searchInput.value.trim();
+        currentSearchQuery = query;
+        
+        console.log("Search query:", query);
+        
+        // Load places from API or localStorage (reuse if already loaded, otherwise load fresh)
+        if (allPlaces.length === 0) {
+          if (window.TMAPI && window.TMAPI.USE_BACKEND && window.TMAPI.Places) {
+            try {
+              allPlaces = await window.TMAPI.Places.getAll();
+            } catch (err) {
+              console.error('[Map] Failed to load places from API:', err);
+              allPlaces = TM.getPlaces();
+            }
+          } else {
+            allPlaces = TM.getPlaces();
+          }
+        }
+        
+        // Check if query is a TM code
+        if (query && isTMCode(query)) {
+          console.log("TM code detected:", query);
+          // For inspectors/admins: search in all places
+          // For regular users: search only in approved places
+          const searchPlaces = (isInspector || isAdmin) ? allPlaces : allPlaces.filter(p => p.status === "approved");
+          console.log("Total places to search:", searchPlaces.length);
+          
+          const place = searchPlaces.find((p) => {
+            const code = p.tropicalCode || p.tropical_code;
+            const match = code && code.toUpperCase() === query.toUpperCase();
+            if (match) console.log("Found place:", p.name, code);
+            return match;
+          });
+          
+          if (place) {
+            console.log("Place found, showing details:", place);
+            showPlaceDetails(place);
+            selectedPlaceId = place.id;
+            return;
+          } else {
+            // TM code not found
+            console.log("TM code not found:", query);
+            searchResults.innerHTML = `
+              <div class="banner muted" style="padding:20px; text-align:center">
+                <span class="material-icons" style="font-size: 32px; display:block; margin-bottom:8px; opacity:0.5">search_off</span>
+                Code TM introuvable: <strong>${escapeHtml(query)}</strong>
+                <div style="margin-top:8px; font-size:12px; color: rgba(10,42,67,0.5)">
+                  Essayez: TM-LSH-000001, TM-LSH-000005, etc.
+                </div>
+              </div>
+            `;
+            render();
+            return;
+          }
+        }
+        
+        // Filter places based on user role
+        let places;
+        if (isInspector || isAdmin) {
+          // Inspector/Admin: Show all places matching query
+          places = allPlaces
+            .filter((p) => matchesQuery(p, query))
+            .filter(applyFilters);
+          
+          // Filter by commune if inspector (not admin)
+          if (isInspector && !isAdmin && currentUser && currentUser.commune) {
+            places = places.filter(p => String(p.commune || "") === String(currentUser.commune));
+          }
+        } else {
+          // Regular users: Only approved places
+          places = allPlaces
+            .filter((p) => p.status === "approved")
+            .filter((p) => matchesQuery(p, query))
+            .filter(applyFilters);
+        }
+        
+        // Apply category filter
+        if (selectedCategory) {
+          places = places.filter((p) => {
+            if (!p.categories || !Array.isArray(p.categories)) return false;
+            return p.categories.some(cat => 
+              cat.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+              selectedCategory.toLowerCase().includes(cat.toLowerCase())
+            );
+          });
+        }
+        
+        searchResults.innerHTML = "";
+        
+        if (query) {
+          if (places.length === 0) {
+            searchResults.innerHTML = '<div class="banner muted" style="padding:20px; text-align:center">Aucun résultat trouvé</div>';
+          } else {
+            places.forEach((p) => {
+              const el = document.createElement("div");
+              el.className = "card placeCard";
+              el.style.cursor = "pointer";
+              el.style.marginBottom = "12px";
+              el.style.transition = "all 0.2s";
+              el.style.border = selectedPlaceId === p.id ? "2px solid var(--green)" : "1px solid var(--border)";
+              el.onmouseenter = () => {
+                if (selectedPlaceId !== p.id) el.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+                // Highlight marker on hover
+                layer.eachLayer((marker) => {
+                  if (marker.options && marker.options.placeId === p.id) {
+                    marker.setOpacity(1);
+                    marker.setZIndexOffset(1000);
+                  }
+                });
+              };
+              el.onmouseleave = () => {
+                if (selectedPlaceId !== p.id) el.style.boxShadow = "";
+                // Reset marker
+                layer.eachLayer((marker) => {
+                  if (marker.options && marker.options.placeId === p.id && selectedPlaceId !== p.id) {
+                    marker.setZIndexOffset(0);
+                  }
+                });
+              };
+              el.onclick = () => {
+                selectedPlaceId = p.id;
+                showPlaceDetails(p);
+              };
+              el.innerHTML = `
+                <div class="placeRow">
+                  <div>
+                    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:6px">
+                      <span class="badge" style="font-size:11px; padding:4px 8px">${getTypeInfo(p.type).name}</span>
+                    </div>
+                    <div style="font-weight:900; font-size:15px; display:flex; align-items:center; gap:6px; margin-bottom:4px">
+                      <span class="material-icons" style="font-size: 16px; color: ${getTypeInfo(p.type).color}">${getTypeInfo(p.type).icon}</span>
+                      ${escapeHtml(p.name)}
+                    </div>
+                    <div class="muted" style="font-size:12px; margin-bottom:4px">${escapeHtml(p.neighborhood)} • ${escapeHtml(p.commune)}</div>
+                    ${p.address ? `<div class="muted" style="font-size:11px; margin-bottom:4px"><span class="material-icons" style="font-size:11px;vertical-align:middle;margin-right:2px">place</span>${escapeHtml(p.address)}</div>` : ""}
+                    <div class="code" style="font-size:11px">${escapeHtml(p.tropicalCode)}</div>
+                  </div>
+                </div>
+              `;
+              searchResults.appendChild(el);
+            });
+          }
+        } else {
+          searchResults.innerHTML = "";
+        }
+        
+        // Re-render map with search results
+        render();
+      }
+      
+      // Report chips (top bar) - filter by type (incident, work_road, etc.)
+      if (categoriesContainer) {
+        categoriesContainer.addEventListener("click", (e) => {
+          const chip = e.target.closest(".reportChip");
+          if (!chip) return;
+          
+          const type = chip.dataset.type;
+          const filterTypeSelect = document.getElementById("filterType");
+          const currentType = filterTypeSelect.value;
+          
+          if (currentType === type) {
+            filterTypeSelect.value = "";
+            chip.classList.remove("active");
+          } else {
+            filterTypeSelect.value = type;
+            categoriesContainer.querySelectorAll(".reportChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+          }
+          
+          updateActiveFilters();
+          render();
+        });
+      }
+      
+      // Place type chips (side panel) - filter by category (restaurant, hotel, etc.)
+      const panelCategoryChips = document.getElementById("panelCategoryChips");
+      if (panelCategoryChips) {
+        panelCategoryChips.addEventListener("click", (e) => {
+          const chip = e.target.closest(".categoryChip");
+          if (!chip) return;
+          
+          const category = chip.dataset.category;
+          
+          if (selectedCategory === category) {
+            selectedCategory = null;
+            chip.classList.remove("active");
+          } else {
+            selectedCategory = category;
+            panelCategoryChips.querySelectorAll(".categoryChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+          }
+          
+          if (selectedCategory) {
+            searchInput.value = "";
+            currentSearchQuery = "";
+          }
+          
+          renderSearchResults();
+          render();
+        });
+      }
+      
+      searchBtn.addEventListener("click", renderSearchResults);
+      searchInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") renderSearchResults();
+      });
+      searchInput.addEventListener("input", () => {
+        // Clear category when typing
+        if (searchInput.value.trim() && selectedCategory) {
+          selectedCategory = null;
+          if (panelCategoryChips) {
+            panelCategoryChips.querySelectorAll(".categoryChip").forEach(c => c.classList.remove("active"));
+          }
+        }
+        renderSearchResults();
+      });
+      
+      
+      // Collapsible filters
+      document.getElementById("filterToggle").addEventListener("click", () => {
+        filterCollapsed = !filterCollapsed;
+        const panel = document.getElementById("filterPanel");
+        const icon = document.getElementById("filterIcon");
+        panel.style.display = filterCollapsed ? "none" : "";
+        icon.style.transform = filterCollapsed ? "rotate(-90deg)" : "rotate(0deg)";
+      });
+
+      // Collapsible pending approval list
+      const pendingApprovalToggle = document.getElementById("pendingApprovalToggle");
+      if (pendingApprovalToggle) {
+        pendingApprovalToggle.addEventListener("click", () => {
+          pendingApprovalCollapsed = !pendingApprovalCollapsed;
+          const list = document.getElementById("pendingApprovalList");
+          const icon = document.getElementById("pendingApprovalIcon");
+          if (list) list.style.display = pendingApprovalCollapsed ? "none" : "";
+          if (icon) icon.style.transform = pendingApprovalCollapsed ? "rotate(-90deg)" : "rotate(0deg)";
+        });
+      }
+
+      // Reset filters
+      document.getElementById("resetFilters").addEventListener("click", () => {
+        document.getElementById("filterType").value = "";
+        document.getElementById("filterCommune").value = "";
+        document.getElementById("filterNeighborhood").value = "";
+        const communeCustom = document.getElementById("filterCommuneCustom");
+        const neighborhoodCustom = document.getElementById("filterNeighborhoodCustom");
+        if (communeCustom) {
+          communeCustom.style.display = "none";
+          communeCustom.value = "";
+        }
+        if (neighborhoodCustom) {
+          neighborhoodCustom.style.display = "none";
+          neighborhoodCustom.value = "";
+        }
+        selectedCategory = null;
+        if (panelCategoryChips) {
+          panelCategoryChips.querySelectorAll(".categoryChip").forEach(c => c.classList.remove("active"));
+        }
+        if (categoriesContainer) {
+          categoriesContainer.querySelectorAll(".reportChip").forEach(c => c.classList.remove("active"));
+        }
+        updateActiveFilters();
+        render();
+      });
+
+      function updateActiveFilters() {
+        const type = document.getElementById("filterType").value;
+        // Sync report chips with filterType
+        if (categoriesContainer) {
+          categoriesContainer.querySelectorAll(".reportChip").forEach(c => {
+            c.classList.toggle("active", c.dataset.type === type);
+          });
+        }
+        const container = document.getElementById("activeFilters");
+        container.innerHTML = "";
+        const communeSelect = document.getElementById("filterCommune");
+        const neighborhoodSelect = document.getElementById("filterNeighborhood");
+        const communeCustom = document.getElementById("filterCommuneCustom");
+        const neighborhoodCustom = document.getElementById("filterNeighborhoodCustom");
+        
+        // Get commune value (from select or custom input)
+        let commune = "";
+        let communeDisplay = "";
+        if (communeSelect.value === "__custom__") {
+          commune = communeCustom ? communeCustom.value.trim() : "";
+          communeDisplay = commune;
+        } else {
+          commune = communeSelect.value.trim();
+          communeDisplay = communeSelect.options[communeSelect.selectedIndex]?.text || commune;
+        }
+        
+        // Get neighborhood value (from select or custom input)
+        let neighborhood = "";
+        let neighborhoodDisplay = "";
+        if (neighborhoodSelect.value === "__custom__") {
+          neighborhood = neighborhoodCustom ? neighborhoodCustom.value.trim() : "";
+          neighborhoodDisplay = neighborhood;
+        } else {
+          neighborhood = neighborhoodSelect.value.trim();
+          neighborhoodDisplay = neighborhoodSelect.options[neighborhoodSelect.selectedIndex]?.text || neighborhood;
+        }
+        
+        if (type) {
+          const chip = document.createElement("span");
+          chip.className = "badge";
+          const typeInfo = getTypeInfo(type);
+          chip.style.background = typeInfo.bgColor;
+          chip.innerHTML = `<span class="material-icons" style="font-size: 14px; vertical-align: middle;">${typeInfo.icon}</span> ${typeInfo.name}`;
+          container.appendChild(chip);
+        }
+        if (commune) {
+          const chip = document.createElement("span");
+          chip.className = "badge";
+          chip.style.background = "rgba(46,196,241,.12)";
+          chip.innerHTML = `<span class="material-icons" style="font-size: 14px; vertical-align: middle;">location_city</span> ${communeDisplay}`;
+          container.appendChild(chip);
+        }
+        if (neighborhood) {
+          const chip = document.createElement("span");
+          chip.className = "badge";
+          chip.style.background = "rgba(249,199,79,.12)";
+          chip.innerHTML = `<span class="material-icons" style="font-size: 14px; vertical-align: middle;">place</span> ${neighborhoodDisplay}`;
+          container.appendChild(chip);
+        }
+      }
+
+      let pendingApprovalCollapsed = true;
+      function updatePendingApprovalSection() {
+        const section = document.getElementById("pendingApprovalSection");
+        const list = document.getElementById("pendingApprovalList");
+        const countEl = document.getElementById("pendingApprovalCount");
+        const iconEl = document.getElementById("pendingApprovalIcon");
+        if (!section || !list || !countEl) return;
+        if (!isInspector && !isAdmin) {
+          section.style.display = "none";
+          return;
+        }
+        let pending = allPlaces.filter(p => p.status === "pending" || p.status === "pending_review");
+        section.style.display = "";
+        countEl.textContent = pending.length;
+        list.innerHTML = "";
+        list.style.display = pendingApprovalCollapsed ? "none" : "";
+        if (iconEl) iconEl.style.transform = pendingApprovalCollapsed ? "rotate(-90deg)" : "rotate(0deg)";
+        pending.forEach(p => {
+          const card = document.createElement("div");
+          card.className = "card placeCard";
+          card.style.cursor = "pointer";
+          card.style.marginBottom = "8px";
+          card.style.padding = "10px 12px";
+          card.style.borderLeft = "3px solid #F59E0B";
+          card.onclick = () => {
+            const lat = parseFloat(p.location_lat || p.location?.lat);
+            const lng = parseFloat(p.location_lng || p.location?.lng);
+            if (!isNaN(lat) && !isNaN(lng)) map.setView([lat, lng], Math.max(map.getZoom(), 16));
+            showPlaceDetails(p);
+            selectedPlaceId = p.id;
+            const marker = layer.getLayers().find(m => m.options && m.options.placeId === p.id);
+            if (marker) {
+              selectedMarker = marker;
+              marker.setIcon(iconForPurple(p.type, p.categories, p.pinIcon || p.pin_icon));
+              marker.setZIndexOffset(1000);
+            }
+          };
+          card.innerHTML = `
+            <div style="font-weight:600; font-size:14px">${escapeHtml(p.name || "Sans nom")}</div>
+            <div class="muted" style="font-size:12px; margin-top:4px">${escapeHtml(p.neighborhood || "")} • ${escapeHtml(p.commune || "")}</div>
+            <div class="code" style="font-size:11px; margin-top:4px">${escapeHtml(p.tropicalCode || p.tropical_code || p.id)}</div>
+          `;
+          list.appendChild(card);
+        });
+      }
+
+      function applyFilters(p) {
+        const t = document.getElementById("filterType").value;
+        const communeSelect = document.getElementById("filterCommune");
+        const neighborhoodSelect = document.getElementById("filterNeighborhood");
+        const communeCustom = document.getElementById("filterCommuneCustom");
+        const neighborhoodCustom = document.getElementById("filterNeighborhoodCustom");
+        
+        // Get commune value (from select or custom input)
+        let c = "";
+        if (communeSelect.value === "__custom__") {
+          c = communeCustom ? communeCustom.value.trim() : "";
+        } else {
+          c = communeSelect.value.trim();
+        }
+        
+        // Get neighborhood value (from select or custom input)
+        let n = "";
+        if (neighborhoodSelect.value === "__custom__") {
+          n = neighborhoodCustom ? neighborhoodCustom.value.trim() : "";
+        } else {
+          n = neighborhoodSelect.value.trim();
+        }
+        
+        if (t) {
+          if (p.type !== t) return false;
+        }
+        if (c) {
+          // For custom commune, do partial match; for predefined, exact match
+          if (communeSelect.value === "__custom__") {
+            if (!String(p.commune).toLowerCase().includes(c.toLowerCase())) return false;
+          } else {
+            if (String(p.commune).toLowerCase() !== c.toLowerCase()) return false;
+          }
+        }
+        if (n) {
+          // For custom neighborhood, do partial match; for predefined, exact match
+          if (neighborhoodSelect.value === "__custom__") {
+            if (!String(p.neighborhood).toLowerCase().includes(n.toLowerCase())) return false;
+          } else {
+            if (String(p.neighborhood).toLowerCase() !== n.toLowerCase()) return false;
+          }
+        }
+        return true;
+      }
+
+      // Search query state
+      let currentSearchQuery = "";
+      
+      // Store all places and incidents in variables accessible to callbacks
+      let allPlaces = [];
+      let allIncidents = [];
+
+      async function render() {
+        layer.clearLayers();
+        
+        // Load places from API or localStorage
+        allPlaces = [];
+        if (window.TMAPI && window.TMAPI.USE_BACKEND && window.TMAPI.Places) {
+          try {
+            allPlaces = await window.TMAPI.Places.getAll();
+            console.log(`[Map] Loaded ${allPlaces.length} places from API`);
+          } catch (err) {
+            console.error('[Map] Failed to load places from API:', err);
+            allPlaces = TM.getPlaces();
+          }
+        } else {
+          allPlaces = TM.getPlaces();
+        }
+        
+        // Main map: public users see only approved places; inspectors/admins see all (for review)
+        let places;
+        if (isInspector || isAdmin) {
+          // Inspector/Admin mode: Show all places
+          places = allPlaces.filter((p) => {
+            return true; // All inspectors and admins see all places
+          }).filter(applyFilters);
+          console.log(`[Map Inspector] Showing ${places.length} places (all types and statuses)`);
+        } else {
+          // Public mode: Only show approved business places
+          places = allPlaces.filter((p) => {
+            // Only show business types (business, airport, hospital, clinic) - NOT residential (home)
+            if (p.type === "home") return false; // Residential addresses are private
+            
+            // Check visibility: business should be public, residential should be private
+            const isPublic = p.visibility === "public" || (!p.visibility && p.type !== "home");
+            
+            if (p.status === "approved" && isPublic) return true;
+            return false;
+          }).filter(applyFilters);
+        }
+        
+        // Apply search query if exists
+        if (currentSearchQuery.trim()) {
+          places = places.filter((p) => matchesQuery(p, currentSearchQuery));
+        }
+        
+        // Apply category filter
+        if (selectedCategory) {
+          places = places.filter((p) => {
+            if (!p.categories || !Array.isArray(p.categories)) return false;
+            return p.categories.some(cat => 
+              cat.toLowerCase().includes(selectedCategory.toLowerCase()) ||
+              selectedCategory.toLowerCase().includes(cat.toLowerCase())
+            );
+          });
+        }
+        
+        // Update result count
+        const count = places.length;
+        document.getElementById("resultCount").textContent = `${count} ${count === 1 ? "lieu" : "lieux"}`;
+        
+        // Update active filters
+        updateActiveFilters();
+        
+        // Update pending approval section (inspector/admin only)
+        updatePendingApprovalSection();
+        
+        places.forEach((p) => {
+          // Handle both API format (location_lat, location_lng) and localStorage format (location.lat, location.lng)
+          let lat, lng;
+          if (p.location_lat && p.location_lng) {
+            lat = parseFloat(p.location_lat);
+            lng = parseFloat(p.location_lng);
+          } else if (p.location && typeof p.location.lat === "number" && typeof p.location.lng === "number") {
+            lat = p.location.lat;
+            lng = p.location.lng;
+          } else {
+            console.warn("Place missing valid location:", p.id, p.name, p);
+            return;
+          }
+          
+          if (isNaN(lat) || isNaN(lng)) {
+            console.warn("Place has invalid location coordinates:", p.id, p.name, { lat, lng });
+            return;
+          }
+          
+          // Use appropriate icon based on type (green for home, red for business)
+          const markerIcon = iconFor(p.type, p.categories, p.pinIcon || p.pin_icon, p.status);
+          const m = L.marker([lat, lng], { icon: markerIcon, placeId: p.id, pane: "placePinsPane" }).addTo(layer);
+          
+          m.on("contextmenu", (e) => {
+            L.DomEvent.stop(e);
+            if (!(isAdmin || isInspector)) return;
+            const menu = document.getElementById("pinContextMenu");
+            if (!menu) return;
+            const ev = e.originalEvent;
+            menu.style.left = (ev?.clientX ?? e.containerPoint.x) + "px";
+            menu.style.top = (ev?.clientY ?? e.containerPoint.y) + "px";
+            menu.style.display = "block";
+            menu.setAttribute("aria-hidden", "false");
+            menu.dataset.placeId = p.id;
+            menu.dataset.placeName = p.name || "";
+            menu.dataset.tropicalCode = p.tropicalCode || p.tropical_code || p.id || "";
+            const closeMenu = () => {
+              menu.style.display = "none";
+              menu.setAttribute("aria-hidden", "true");
+              menu.dataset.placeId = "";
+              document.removeEventListener("click", closeMenu);
+            };
+            menu.onclick = (ev) => ev.stopPropagation();
+            document.addEventListener("click", closeMenu);
+            menu.querySelector("[data-action=delete]").onclick = async (ev) => {
+              ev.stopPropagation();
+              const placeId = menu.dataset.placeId;
+              const placeName = menu.dataset.placeName;
+              const code = menu.dataset.tropicalCode;
+              closeMenu();
+              if (!placeId || !confirm(`Supprimer « ${escapeHtml(placeName)} » (${code}) ?`)) return;
+              try {
+                if (window.TMAPI && window.TMAPI.Places) {
+                  await window.TMAPI.Places.delete(placeId);
+                } else {
+                  TM.deletePlaceOwner(placeId);
+                }
+                TM.toast("Lieu supprimé", "success");
+                if (deletePlaceMode) exitAddOrDeleteMode();
+                await render();
+                await renderSearchResults();
+              } catch (err) {
+                TM.toast(err?.message || "Erreur lors de la suppression", "error");
+              }
+            };
+          });
+          m.on("click", () => {
+            // Admin/Inspector delete mode: click on pin to delete
+            if (deletePlaceMode && (isAdmin || isInspector)) {
+              if (!confirm(`Supprimer « ${escapeHtml(p.name)} » (${p.tropicalCode || p.id}) ?`)) return;
+              (async () => {
+                try {
+                  if (window.TMAPI && window.TMAPI.Places) {
+                    await window.TMAPI.Places.delete(p.id);
+                  } else {
+                    TM.deletePlaceOwner(p.id);
+                  }
+                  TM.toast("Lieu supprimé", "success");
+                  exitAddOrDeleteMode();
+                  await render();
+                  await renderSearchResults();
+                } catch (err) {
+                  TM.toast(err.message || "Erreur lors de la suppression", "error");
+                }
+              })();
+              return;
+            }
+            const allowFullDetails = (isInspector || isAdmin) || p.type !== "home";
+            
+            if (allowFullDetails) {
+              // Restore previous marker icon if exists
+              if (selectedMarker && selectedMarker !== m) {
+                const prevPlace = allPlaces.find(pl => pl.id === selectedMarker.options.placeId);
+                if (prevPlace) {
+                  selectedMarker.setIcon(iconFor(prevPlace.type, prevPlace.categories, prevPlace.pinIcon || prevPlace.pin_icon, prevPlace.status));
+                  selectedMarker.setZIndexOffset(0);
+                  if (selectedMarker.dragging) selectedMarker.dragging.disable();
+                }
+              }
+              
+              // Change current pin to purple
+              m.setIcon(iconForPurple(p.type, p.categories, p.pinIcon || p.pin_icon));
+              m.setZIndexOffset(1000);
+              if (m.dragging) m.dragging.disable();
+              
+              // Show place details in side panel
+              showPlaceDetails(p);
+              selectedPlaceId = p.id;
+              selectedMarker = m;
+            } else {
+              // For other users, show preview
+            preview.style.display = "";
+            preview.innerHTML = `
+              <div class="placeRow">
+                <div>
+                  <div style="font-weight:900">${escapeHtml(p.name)}</div>
+                  <div class="muted">${escapeHtml(p.neighborhood)} • ${escapeHtml(p.commune)}</div>
+                  <div class="code">${escapeHtml(p.tropicalCode)}</div>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end">
+                    <a class="btn secondary small" href="place.html?id=${encodeURIComponent(p.id)}">
+                      <span class="material-icons" style="font-size: 16px; vertical-align: middle;">visibility</span>
+                      Voir les détails
+                    </a>
+                </div>
+              </div>
+            `;
+            }
+          });
+        });
+
+        // Add incident/reaction pins: from API (approved) when backend, else localStorage
+        let incidents = [];
+        if (window.TMAPI && window.TMAPI.USE_BACKEND && window.TMAPI.Incidents) {
+          try {
+            incidents = await window.TMAPI.Incidents.getPublic();
+          } catch (e) {
+            console.warn("[Map] Failed to fetch incidents from API:", e);
+          }
+        } else {
+          try {
+            incidents = JSON.parse(localStorage.getItem("tm_incidents") || "[]");
+          } catch (e) {}
+        }
+        const filterTypeVal = document.getElementById("filterType")?.value || "";
+        allIncidents = incidents;
+        incidents.forEach((inc) => {
+          const lat = parseFloat(inc.lat);
+          const lng = parseFloat(inc.lng);
+          if (isNaN(lat) || isNaN(lng)) return;
+          if (filterTypeVal && inc.type !== filterTypeVal) return;
+          const reportTypes = ["incident", "accident", "work_road", "wild_animal", "event"];
+          if (!reportTypes.includes(inc.type)) return;
+          const markerIcon = iconFor(inc.type, [], null, "approved");
+          const m = L.marker([lat, lng], { icon: markerIcon, placeId: inc.id, isIncident: true, pane: "placePinsPane" }).addTo(layer);
+          m.on("click", () => showIncidentDetails(inc, m));
+        });
+
+        // Add marker for URL-specified location (e.g. admin incident "Voir sur la carte")
+        if (hasUrlLocation && urlIncident) {
+          const lat = parseFloat(urlLat);
+          const lng = parseFloat(urlLng);
+          const markerIcon = iconFor("incident", [], null, "approved");
+          const m = L.marker([lat, lng], { icon: markerIcon, pane: "placePinsPane", isUrlIncident: true }).addTo(layer);
+          const urlInc = { type: "incident", lat, lng, description: "Emplacement du signalement", tropical_code: "—" };
+          m.on("click", () => showIncidentDetails(urlInc, m));
+        }
+
+        updatePinsVisibility();
+      }
+
+      function escapeHtml(s){
+        return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+      }
+
+      // Ensure seed runs and render after initialization
+      TM.seed(); // Ensure demo places exist
+      
+      map.on("zoomend", updatePinsVisibility);
+      
+      // Initial render - wait a bit for filters to be populated
+      setTimeout(async () => {
+        await render();
+        updateActiveFilters();
+        // Fly to URL-specified location (e.g. from admin incidents "Voir sur la carte")
+        if (hasUrlLocation) {
+          const lat = parseFloat(urlLat);
+          const lng = parseFloat(urlLng);
+          map.flyTo([lat, lng], 17, { duration: 0.8 });
+        }
+      }, 200);
+      
+      // Update map when filters change
+      ["filterType","filterCommune","filterNeighborhood"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("change", () => {
+            render();
+            renderSearchResults();
+          });
+        }
+      });
+      
+      window.addEventListener("storage", render);
+      TM.buildNav();
+      
+      // Build mobile menu dynamically
+      function buildMobileMenu() {
+        const mobileMenu = document.getElementById("mobileMenu");
+        if (!mobileMenu) return;
+        
+        const u = TM.getCurrentUser();
+        let menuHTML = `
+          <a href="index.html">
+            <span class="material-icons">home</span>
+            <span>Accueil</span>
+          </a>
+          <a href="map.html">
+            <span class="material-icons">map</span>
+            <span>Voir la carte</span>
+          </a>
+          <a href="search.html">
+            <span class="material-icons">search</span>
+            <span>Recherche</span>
+          </a>
+        `;
+        
+        if (u) {
+          const dashHref = u.role === "admin" ? "admin/index.html" : "dashboard/index.html";
+          menuHTML += `
+            <a href="${dashHref}">
+              <span class="material-icons">dashboard</span>
+              <span>Tableau</span>
+            </a>
+            <button class="mobileMenuLogout" id="mobileMenuLogout" type="button">
+              <span class="material-icons">logout</span>
+              <span>Déconnexion</span>
+            </button>
+          `;
+        } else {
+          menuHTML += `
+            <a href="auth/login.html">
+              <span class="material-icons">login</span>
+              <span>Se connecter</span>
+            </a>
+          `;
+        }
+        
+        mobileMenu.innerHTML = menuHTML;
+        
+        // Handle logout button
+        const logoutBtn = document.getElementById("mobileMenuLogout");
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", () => {
+            // Clear session
+            localStorage.removeItem("tm_session_v1");
+            window.location.href = "index.html";
+          });
+        }
+      }
+      
+      // Mobile menu toggle
+      const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+      const mobileMenuIcon = document.getElementById("mobileMenuIcon");
+      const mobileMenu = document.getElementById("mobileMenu");
+      let mobileMenuOpen = false;
+      
+      // Build menu on load
+      buildMobileMenu();
+      
+      if (mobileMenuBtn && mobileMenu && mobileMenuIcon) {
+        mobileMenuBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          mobileMenuOpen = !mobileMenuOpen;
+          mobileMenu.classList.toggle("open", mobileMenuOpen);
+          mobileMenuIcon.textContent = mobileMenuOpen ? "close" : "menu";
+        });
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener("click", (e) => {
+          if (mobileMenuOpen && !mobileMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+            mobileMenuOpen = false;
+            mobileMenu.classList.remove("open");
+            mobileMenuIcon.textContent = "menu";
+          }
+        });
+        
+        // Close mobile menu when clicking on a link or button
+        if (mobileMenu) {
+          mobileMenu.addEventListener("click", (e) => {
+            if (e.target.closest("a") || e.target.closest("button")) {
+              mobileMenuOpen = false;
+              mobileMenu.classList.remove("open");
+              mobileMenuIcon.textContent = "menu";
+            }
+          });
+        }
+      }
+      
+      // Function to clear place selection and reset map view
+      window.clearPlaceSelection = async function() {
+        selectedPlaceId = null;
+        currentSearchQuery = "";
+        searchInput.value = "";
+        
+        // Hide preview banner (bottom floating card)
+        const previewEl = document.getElementById("preview");
+        if (previewEl) {
+          previewEl.style.display = "none";
+          previewEl.innerHTML = "";
+        }
+        
+        // Close side panel
+        setPanelOpen(false);
+        
+        // Hide clear selection button in header
+        const clearSelectionBtn = document.getElementById("clearSelectionBtn");
+        if (clearSelectionBtn) {
+          clearSelectionBtn.style.display = "none";
+        }
+        
+        // Clear search results
+        if (searchResults) {
+          searchResults.innerHTML = "";
+        }
+        
+        // Reset category selection
+        selectedCategory = null;
+        if (panelCategoryChips) {
+          panelCategoryChips.querySelectorAll(".categoryChip").forEach(c => c.classList.remove("active"));
+        }
+        if (categoriesContainer) {
+          categoriesContainer.querySelectorAll(".reportChip").forEach(c => c.classList.remove("active"));
+        }
+        
+        // Zoom out slightly from current view so user can see nearby pins (don't reset to default)
+        const center = map.getCenter();
+        const currentZoom = map.getZoom();
+        const zoomOut = Math.max(12, currentZoom - 2);
+        if (zoomOut < currentZoom) {
+          map.setView(center, zoomOut);
+        }
+        
+        // Reset selected marker reference
+        selectedMarker = null;
+        
+        // Re-render to show all places (this will reload everything and restore icons)
+        await render();
+        await renderSearchResults();
+      };
+
+      // Inspector/Admin: Add place functionality
+      const addPlaceBtn = document.getElementById("addPlaceBtn");
+      const addPlaceModal = document.getElementById("addPlaceModal");
+      const addPlaceForm = document.getElementById("addPlaceForm");
+      const closeAddPlaceModal = document.getElementById("closeAddPlaceModal");
+      const cancelAddPlace = document.getElementById("cancelAddPlace");
+
+      // Icon picker logic
+      const iconPickerField = document.getElementById("iconPickerField");
+      const iconPicker = document.getElementById("iconPicker");
+      const addPlacePinIcon = document.getElementById("addPlacePinIcon");
+      const addPlaceTypeSelect = document.getElementById("addPlaceType");
+
+      // Show/hide icon picker based on type
+      if (addPlaceTypeSelect && iconPickerField) {
+        const toggleIconPicker = () => {
+          const reportTypes = ["incident","accident","work_road","wild_animal","event"];
+          const showPicker = addPlaceTypeSelect.value !== "home" && !reportTypes.includes(addPlaceTypeSelect.value);
+          iconPickerField.style.display = showPicker ? "block" : "none";
+          if (!showPicker && addPlacePinIcon) addPlacePinIcon.value = "";
+        };
+        addPlaceTypeSelect.addEventListener("change", toggleIconPicker);
+        toggleIconPicker();
+      }
+
+      // Handle icon selection
+      if (iconPicker && addPlacePinIcon) {
+        iconPicker.addEventListener("click", (e) => {
+          const btn = e.target.closest(".gm-icon-option");
+          if (!btn) return;
+          iconPicker.querySelectorAll(".gm-icon-option").forEach(b => b.classList.remove("selected"));
+          btn.classList.add("selected");
+          addPlacePinIcon.value = btn.dataset.icon;
+        });
+      }
+      let addPlaceMode = false;
+      let deletePlaceMode = false;
+      let tempMarker = null;
+      let selectedLocation = null;
+
+      // Close side panel when clicking on the map (not on markers or popups)
+      map.on("click", (e) => {
+        if (addPlaceMode || deletePlaceMode) return;
+        const target = e.originalEvent && e.originalEvent.target;
+        if (target && (target.closest(".leaflet-marker-icon") || target.closest(".leaflet-popup") || target.closest(".leaflet-marker-pane") || target.closest(".leaflet-popup-pane"))) return;
+        if (panelOpen) {
+          setPanelOpen(false);
+          clearPlaceSelection();
+        }
+      });
+
+      // Show add place dropdown for inspector or admin
+      const addPlaceDropdownWrap = document.getElementById("addPlaceDropdownWrap");
+      const addPlaceMenu = document.getElementById("addPlaceMenu");
+      const addMenuDeleteBtn = document.getElementById("addMenuDeleteBtn");
+      if (canAddPlace && addPlaceDropdownWrap) {
+        addPlaceDropdownWrap.style.display = "block";
+        if ((isAdmin || isInspector) && addMenuDeleteBtn) addMenuDeleteBtn.style.display = "flex";
+      }
+
+      // Populate commune and neighborhood dropdowns (once only)
+      let addPlaceDropdownsInitialized = false;
+      function populateAddPlaceDropdowns() {
+        if (addPlaceDropdownsInitialized) return;
+        addPlaceDropdownsInitialized = true;
+
+        const communeSelect = document.getElementById("addPlaceCommune");
+        const neighborhoodSelect = document.getElementById("addPlaceNeighborhood");
+        if (!communeSelect || !neighborhoodSelect) return;
+
+        const communeDataMap = {
+          "Lubumbashi": { name: "Commune de Lubumbashi (Centre-ville)", quartiers: ["Makomeno", "Kamalondo", "Golf", "Kenya"] },
+          "Kampemba": { name: "Commune de Kampemba", quartiers: ["Bel-Air", "Salama", "Kafubu"] },
+          "Kenya": { name: "Commune de Kenya", quartiers: ["Lido", "Golf Plateau", "Kabulameshi"] },
+          "Katuba": { name: "Commune de Katuba", quartiers: ["Katuba", "Kisanga", "Lufira"] },
+          "Ruashi": { name: "Commune de Ruashi", quartiers: ["Kalubwe", "Ruashi", "Matoleo"] },
+          "Kamalondo": { name: "Commune de Kamalondo", quartiers: ["Kamalondo", "Kapemba"] },
+          "Annexe": { name: "Commune Annexe", quartiers: ["Kawama", "Luano", "Munua"] }
+        };
+
+        communeSelect.innerHTML = '<option value="">Sélectionner...</option>';
+        Object.keys(communeDataMap).forEach(key => {
+          const option = document.createElement("option");
+          option.value = key;
+          option.textContent = communeDataMap[key].name;
+          communeSelect.appendChild(option);
+        });
+
+        communeSelect.addEventListener("change", () => {
+          const selectedCommune = communeSelect.value;
+          neighborhoodSelect.innerHTML = '<option value="">Sélectionner...</option>';
+          if (selectedCommune && communeDataMap[selectedCommune]) {
+            communeDataMap[selectedCommune].quartiers.forEach(quartier => {
+              const option = document.createElement("option");
+              option.value = quartier;
+              option.textContent = quartier;
+              neighborhoodSelect.appendChild(option);
+            });
+          }
+        });
+      }
+
+      // Toggle add place dropdown
+      function closeAddMenu() {
+        if (addPlaceMenu) addPlaceMenu.classList.remove("open");
+        if (addPlaceBtn) addPlaceBtn.setAttribute("aria-expanded", "false");
+      }
+      function openAddMenu() {
+        if (addPlaceMenu) addPlaceMenu.classList.add("open");
+        if (addPlaceBtn) addPlaceBtn.setAttribute("aria-expanded", "true");
+      }
+      if (addPlaceBtn && addPlaceMenu) {
+        addPlaceBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (addPlaceMode || deletePlaceMode) {
+            exitAddOrDeleteMode();
+            return;
+          }
+          const isOpen = addPlaceMenu.classList.contains("open");
+          if (isOpen) closeAddMenu();
+          else openAddMenu();
+        });
+        document.addEventListener("click", () => closeAddMenu());
+        addPlaceMenu.addEventListener("click", (e) => e.stopPropagation());
+      }
+
+      // Add place menu actions
+      if (addPlaceMenu) {
+        addPlaceMenu.addEventListener("click", (e) => {
+          const btn = e.target.closest("[data-action]");
+          const link = e.target.closest("a[href]");
+          if (btn && btn.dataset.action === "add-pin") {
+            closeAddMenu();
+            addPlaceMode = true;
+            deletePlaceMode = false;
+            addPlaceBtn.classList.add("active");
+            addPlaceBtn.querySelector(".material-icons").textContent = "close";
+            map.getContainer().style.cursor = "url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\"><path fill=\"%23666\" d=\"M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z\"/></svg>') 12 12, auto";
+            populateAddPlaceDropdowns();
+          } else if (btn && btn.dataset.action === "delete-pin" && (isAdmin || isInspector)) {
+            closeAddMenu();
+            deletePlaceMode = true;
+            addPlaceMode = false;
+            addPlaceBtn.classList.add("active");
+            addPlaceBtn.querySelector(".material-icons").textContent = "close";
+            map.getContainer().style.cursor = "crosshair";
+            if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+            selectedLocation = null;
+            addPlaceModal.style.display = "none";
+            TM.toast("Cliquez sur un lieu pour le supprimer", "info");
+          } else if (link) {
+            closeAddMenu();
+          }
+        });
+      }
+
+      // Exit add/delete mode (reset button)
+      function exitAddOrDeleteMode() {
+        addPlaceMode = false;
+        deletePlaceMode = false;
+        if (addPlaceBtn) {
+          addPlaceBtn.classList.remove("active");
+          const icon = addPlaceBtn.querySelector(".material-icons");
+          if (icon) icon.textContent = "add_location";
+        }
+        map.getContainer().style.cursor = "";
+        if (tempMarker) { map.removeLayer(tempMarker); tempMarker = null; }
+        selectedLocation = null;
+        if (addPlaceModal) addPlaceModal.style.display = "none";
+      }
+
+      // Function to determine commune and neighborhood from coordinates
+      function getCommuneAndNeighborhoodFromCoords(lat, lng) {
+        // Approximate boundaries for Lubumbashi communes
+        // These are simplified zones - in production, use proper geocoding API
+        const zones = {
+          "Lubumbashi": {
+            bounds: { minLat: -11.7, maxLat: -11.6, minLng: 27.4, maxLng: 27.5 },
+            defaultQuartier: "Makomeno"
+          },
+          "Kampemba": {
+            bounds: { minLat: -11.75, maxLat: -11.65, minLng: 27.45, maxLng: 27.55 },
+            defaultQuartier: "Bel-Air"
+          },
+          "Kenya": {
+            bounds: { minLat: -11.65, maxLat: -11.55, minLng: 27.45, maxLng: 27.55 },
+            defaultQuartier: "Lido"
+          },
+          "Katuba": {
+            bounds: { minLat: -11.8, maxLat: -11.7, minLng: 27.5, maxLng: 27.6 },
+            defaultQuartier: "Katuba"
+          },
+          "Ruashi": {
+            bounds: { minLat: -11.6, maxLat: -11.5, minLng: 27.5, maxLng: 27.6 },
+            defaultQuartier: "Kalubwe"
+          },
+          "Kamalondo": {
+            bounds: { minLat: -11.7, maxLat: -11.6, minLng: 27.5, maxLng: 27.6 },
+            defaultQuartier: "Kamalondo"
+          },
+          "Annexe": {
+            bounds: { minLat: -11.8, maxLat: -11.7, minLng: 27.4, maxLng: 27.5 },
+            defaultQuartier: "Kawama"
+          }
+        };
+
+        // Find which commune contains these coordinates
+        for (const [commune, zone] of Object.entries(zones)) {
+          const { bounds } = zone;
+          if (lat >= bounds.minLat && lat <= bounds.maxLat &&
+              lng >= bounds.minLng && lng <= bounds.maxLng) {
+            return { commune, quartier: zone.defaultQuartier };
+          }
+        }
+
+        // Default to Lubumbashi if no match
+        return { commune: "Lubumbashi", quartier: "Makomeno" };
+      }
+
+      // Handle map click in add place mode
+      if (canAddPlace) {
+        map.on("click", (e) => {
+          if (deletePlaceMode) {
+            exitAddOrDeleteMode();
+            return;
+          }
+          if (addPlaceMode) {
+            const { lat, lng } = e.latlng;
+            selectedLocation = { lat, lng };
+            
+            // Remove previous temp marker
+            if (tempMarker) {
+              map.removeLayer(tempMarker);
+            }
+            
+            // Add new temp marker (gray pin)
+            tempMarker = L.marker([lat, lng], {
+              icon: L.divIcon({
+                className: "temp-marker",
+                html: `<div style="width:40px;height:50px;background:#666;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>`,
+                iconSize: [40, 50],
+                iconAnchor: [20, 50]
+              })
+            }).addTo(map);
+
+            // Get commune and neighborhood from coordinates
+            const { commune, quartier } = getCommuneAndNeighborhoodFromCoords(lat, lng);
+
+            // Update location text in modal (with TM code TM-CITY-NNNNNN)
+            const locationText = document.getElementById("addPlaceLocation");
+            if (locationText) {
+              const mtCode = (window.TM && window.TM.generateTropicalCodeFromCoords)
+                ? window.TM.generateTropicalCodeFromCoords(lat, lng, commune)
+                : "TM-LSH-000000";
+              locationText.innerHTML = `${lat.toFixed(6)}, ${lng.toFixed(6)} <span style="font-weight:700;color:var(--green);font-family:monospace;margin-left:8px">${mtCode}</span>`;
+            }
+
+            // Pre-fill commune and neighborhood dropdowns
+            const communeSelect = document.getElementById("addPlaceCommune");
+            const neighborhoodSelect = document.getElementById("addPlaceNeighborhood");
+
+            if (communeSelect && neighborhoodSelect) {
+              // Set commune
+              communeSelect.value = commune;
+
+              // Trigger change event to populate neighborhoods
+              const changeEvent = new Event("change", { bubbles: true });
+              communeSelect.dispatchEvent(changeEvent);
+
+              // Set neighborhood after a short delay to ensure dropdown is populated
+              setTimeout(() => {
+                neighborhoodSelect.value = quartier;
+              }, 100);
+            }
+            
+            // Open modal automatically with location pre-filled
+            addPlaceModal.style.display = "flex";
+            
+            // Reset cursor
+            map.getContainer().style.cursor = "";
+            
+            // Deactivate add mode (user can click button again to add another)
+            addPlaceMode = false;
+            addPlaceBtn.classList.remove("active");
+            addPlaceBtn.querySelector(".material-icons").textContent = "add_location";
+          }
+        });
+      }
+
+      // Close add place modal
+      if (closeAddPlaceModal) {
+        closeAddPlaceModal.addEventListener("click", () => {
+          addPlaceModal.style.display = "none";
+          exitAddOrDeleteMode();
+          // Reset form and icon picker
+          if (addPlaceForm) {
+            addPlaceForm.reset();
+          }
+          if (iconPicker) {
+            iconPicker.querySelectorAll(".gm-icon-option").forEach(b => b.classList.remove("selected"));
+          }
+          if (addPlacePinIcon) addPlacePinIcon.value = "";
+        });
+      }
+
+      if (cancelAddPlace) {
+        cancelAddPlace.addEventListener("click", () => {
+          closeAddPlaceModal.click();
+        });
+      }
+
+      // Handle add place form submission
+      if (addPlaceForm) {
+        addPlaceForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          if (!selectedLocation) {
+            alert("Veuillez cliquer sur la carte pour définir la position du lieu.");
+            return;
+          }
+
+          const name = document.getElementById("addPlaceName").value.trim();
+          const type = document.getElementById("addPlaceType").value;
+          const commune = document.getElementById("addPlaceCommune").value;
+          const neighborhood = document.getElementById("addPlaceNeighborhood").value;
+          const landmark = document.getElementById("addPlaceLandmark").value.trim();
+          const phone = document.getElementById("addPlacePhone").value.trim();
+          const categoriesStr = document.getElementById("addPlaceCategories").value.trim();
+          const categories = categoriesStr ? categoriesStr.split(",").map(c => c.trim()).filter(c => c) : [];
+
+          try {
+            // Validate required fields
+            if (!name || name.length < 2) {
+              alert("Le nom du lieu est requis (minimum 2 caractères).");
+              return;
+            }
+            if (!commune) {
+              alert("Veuillez sélectionner une commune.");
+              return;
+            }
+            if (!neighborhood) {
+              alert("Veuillez sélectionner un quartier.");
+              return;
+            }
+            if (!selectedLocation || typeof selectedLocation.lat !== "number" || typeof selectedLocation.lng !== "number") {
+              alert("Erreur: La localisation n'est pas valide. Veuillez cliquer à nouveau sur la carte.");
+              return;
+            }
+
+            // Get selected pin icon
+            const pinIcon = document.getElementById("addPlacePinIcon").value || null;
+
+            // Create place - use API if available, fallback to localStorage
+            const placeData = {
+              type,
+              name,
+              commune,
+              neighborhood,
+              landmark,
+              phone,
+              categories,
+              location: selectedLocation,
+              photos: [],
+              pinIcon
+            };
+
+            let newPlace;
+            if (window.TMAPI && window.TMAPI.USE_BACKEND && window.TMAPI.Places) {
+              newPlace = await window.TMAPI.Places.create(placeData);
+            } else {
+              newPlace = TM.createPlace(placeData);
+            }
+
+            console.log("Place created:", newPlace.name, "status:", newPlace.status);
+
+            // Remove temporary gray marker
+            if (tempMarker) {
+              map.removeLayer(tempMarker);
+              tempMarker = null;
+            }
+
+            alert(`Lieu créé avec succès! Code: ${newPlace.tropical_code || newPlace.tropicalCode}`);
+            addPlaceForm.reset();
+            closeAddPlaceModal.click();
+
+            // Refresh map to show new pin with correct color
+            render();
+            renderSearchResults();
+
+            // Zoom to new place to show it
+            map.flyTo([selectedLocation.lat, selectedLocation.lng], 18, {
+              duration: 0.8,
+              easeLinearity: 0.25
+            });
+          } catch (error) {
+            alert("Erreur: " + error.message);
+          }
+        });
+      }
+      // ====== REVERSIBLE ADDRESS GENERATION ======
+      // Uses Mapbox Reverse Geocoding to assign street addresses to existing pins.
+      // Backup is saved so the action can be undone.
+
+      const ADDRESS_BACKUP_KEY = "tm_places_address_backup";
+
+      async function reverseGeocode(lat, lng) {
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&language=fr&types=address,place,locality,neighborhood`;
+        try {
+          const res = await fetch(url);
+          if (!res.ok) return null;
+          const data = await res.json();
+          if (data.features && data.features.length > 0) {
+            return data.features[0].place_name || null;
+          }
+        } catch (e) {
+          console.warn("Reverse geocode failed for", lat, lng, e);
+        }
+        return null;
+      }
+
+      async function generateAddresses() {
+        const btn = document.getElementById("genAddressBtn");
+        const undoBtn = document.getElementById("undoAddressBtn");
+        if (btn) { btn.disabled = true; btn.innerHTML = '<span class="material-icons" style="font-size:16px;animation:spin 1s linear infinite">sync</span> Chargement...'; }
+
+        let places;
+        if (window.TMAPI && window.TMAPI.USE_BACKEND && window.TMAPI.Places) {
+          try { places = await window.TMAPI.Places.getAll(); } catch(e) { places = TM.getPlaces(); }
+        } else {
+          places = TM.getPlaces();
+        }
+
+        // Save backup BEFORE modifying (only if no backup exists yet)
+        if (!localStorage.getItem(ADDRESS_BACKUP_KEY)) {
+          localStorage.setItem(ADDRESS_BACKUP_KEY, JSON.stringify(places));
+        }
+
+        let updated = 0;
+        for (const p of places) {
+          let lat, lng;
+          if (p.location_lat && p.location_lng) { lat = parseFloat(p.location_lat); lng = parseFloat(p.location_lng); }
+          else if (p.location) { lat = p.location.lat; lng = p.location.lng; }
+          if (!lat || !lng || isNaN(lat) || isNaN(lng)) continue;
+          if (p.address) continue; // already has one
+
+          const addr = await reverseGeocode(lat, lng);
+          if (addr) {
+            p.address = addr;
+            updated++;
+          }
+          // Small delay to stay under rate limits
+          await new Promise(r => setTimeout(r, 250));
+        }
+
+        // Save updated places back
+        const LS_PLACES = "tm_places_v1";
+        localStorage.setItem(LS_PLACES, JSON.stringify(places));
+
+        if (btn) { btn.disabled = false; btn.innerHTML = '<span class="material-icons" style="font-size:16px">add_location_alt</span> Générer adresses'; }
+        if (undoBtn) undoBtn.style.display = "";
+        TM.toast(`${updated} adresse(s) générée(s) via Mapbox`, "success");
+        render();
+      }
+
+      function undoAddresses() {
+        const backup = localStorage.getItem(ADDRESS_BACKUP_KEY);
+        if (!backup) { TM.toast("Aucune sauvegarde trouvée.", "error"); return; }
+        const LS_PLACES = "tm_places_v1";
+        localStorage.setItem(LS_PLACES, backup);
+        localStorage.removeItem(ADDRESS_BACKUP_KEY);
+        const undoBtn = document.getElementById("undoAddressBtn");
+        if (undoBtn) undoBtn.style.display = "none";
+        TM.toast("Adresses supprimées — données restaurées.", "success");
+        render();
+      }
+
+      // Only show for inspector / admin
+      if (canAddPlace) {
+        const ctrlGroup = document.querySelector(".gm-controls");
+        if (ctrlGroup) {
+          const undoBtn = document.createElement("button");
+          undoBtn.id = "undoAddressBtn";
+          undoBtn.className = "gm-ctrl-single";
+          undoBtn.title = "Annuler la génération d'adresses";
+          undoBtn.setAttribute("aria-label", "Annuler adresses");
+          undoBtn.style.display = localStorage.getItem(ADDRESS_BACKUP_KEY) ? "" : "none";
+          undoBtn.innerHTML = '<span class="material-icons">undo</span>';
+          undoBtn.addEventListener("click", undoAddresses);
+          ctrlGroup.appendChild(undoBtn);
+        }
+      }
+
+      // Spin animation for loading
+      if (!document.getElementById("tmSpinStyle")) {
+        const s = document.createElement("style");
+        s.id = "tmSpinStyle";
+        s.textContent = "@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}";
+        document.head.appendChild(s);
+      }
+    </script>
+
+    <script>
+      // Map Guide: show on first visit, ? button to reopen
+      (function() {
+        const GUIDE_KEY = "tm_map_guide_seen";
+        const modal = document.getElementById("mapGuideModal");
+        const closeBtn = document.getElementById("mapGuideClose");
+        const gotItBtn = document.getElementById("mapGuideGotIt");
+        const helpBtn = document.getElementById("gmMapGuideBtn");
+
+        function showGuide() {
+          if (modal) modal.style.display = "flex";
+        }
+        function hideGuide() {
+          if (modal) modal.style.display = "none";
+          try { localStorage.setItem(GUIDE_KEY, "1"); } catch (e) {}
+        }
+
+        if (closeBtn) closeBtn.addEventListener("click", hideGuide);
+        if (gotItBtn) gotItBtn.addEventListener("click", hideGuide);
+        if (helpBtn) helpBtn.addEventListener("click", showGuide);
+
+        modal.addEventListener("click", function(e) {
+          if (e.target === modal) hideGuide();
+        });
+        document.addEventListener("keydown", function(e) {
+          if (e.key === "Escape" && modal && modal.style.display === "flex") hideGuide();
+        });
+
+        // First visit: show guide after a short delay so map is visible
+        if (!localStorage.getItem(GUIDE_KEY)) {
+          setTimeout(showGuide, 600);
+        }
+      })();
+    </script>
+
+    <footer class="tm-site-footer">
+      <a href="index.html" class="tm-site-footer-logo">
+        <img src="/demos/assets/brand.svg" alt="Tropical Map" />
+        <span>Tropical Map</span>
+      </a>
+      <nav class="tm-site-footer-links" aria-label="Navigation pied de page">
+        <a href="index.html">Accueil</a>
+        <a href="map.html">Carte</a>
+        <a href="search.html">Recherche</a>
+        <a href="real-estate.html">Immobilier</a>
+        <a href="about.html">À propos</a>
+      </nav>
+      <div class="tm-site-footer-copy">© 2026 Tropical Map. Tous droits réservés.</div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobileBottomNav">
+      <button id="mobileBackBtn" onclick="window.history.back()" aria-label="Retour">
+        <span class="material-icons">arrow_back</span>
+      </button>
+      <button class="homeBtn" id="mobileHomeBtn" onclick="window.location.href='index.html'" aria-label="Accueil">
+        <span class="material-icons">home</span>
+      </button>
+      <button onclick="window.location.href='report-incident.html'" aria-label="Signaler un danger">
+        <span class="material-icons">warning</span>
+      </button>
+      <button id="mobileSettingsBtn" onclick="window.location.href='settings.html'" aria-label="Paramètres">
+        <span class="material-icons">settings</span>
+      </button>
+    </div>
+  </body>
+</html>
+
+
