@@ -101,10 +101,11 @@ const skills = [
 ];
 
 const fadeUp = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
     opacity: 1,
-    transition: { delay: i * 0.12, duration: 0.8, ease: "easeOut" as const },
+    y: 0,
+    transition: { delay: i * 0.12, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as const },
   }),
 };
 
@@ -210,9 +211,9 @@ export default function Home() {
             {/* Text */}
             <div className="text-center lg:text-left flex-1">
               <motion.p
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.6 }}
+                transition={{ delay: 0.2, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
                 className="text-sm font-medium tracking-widest uppercase mb-4"
                 style={{ color: blue }}
               >
@@ -220,9 +221,9 @@ export default function Home() {
               </motion.p>
 
               <motion.h1
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.7 }}
+                transition={{ delay: 0.3, duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
                 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.95] mb-6"
               >
                 Aimar
@@ -252,9 +253,9 @@ export default function Home() {
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.4, duration: 0.6 }}
+                transition={{ delay: 1.4, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
                 className="flex gap-4 mt-8 justify-center lg:justify-start"
               >
                 <a href="#work" className="px-7 py-3 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105" style={{ background: blue }}>
@@ -273,10 +274,10 @@ export default function Home() {
       <section id="work" className="px-6 md:px-12 py-32">
         <div className="max-w-6xl mx-auto">
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
             className="flex items-end justify-between mb-16"
           >
             <div>
@@ -454,10 +455,10 @@ export default function Home() {
       <section id="skills" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-6xl mx-auto">
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
             className="mb-16"
           >
             <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
@@ -722,10 +723,10 @@ export default function Home() {
       <section id="about" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-4xl mx-auto">
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
           >
             <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>About</p>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">
@@ -753,10 +754,10 @@ export default function Home() {
       <section id="contact" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
           >
             <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
               Contact
