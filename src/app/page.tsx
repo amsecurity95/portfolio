@@ -100,12 +100,11 @@ const skills = [
   { name: "Claude Code", icon: <TbTerminal2 /> },
 ];
 
-const fadeUp = {
-  hidden: { opacity: 0, y: 20 },
+const fadeIn = {
+  hidden: { opacity: 0 },
   visible: (i: number) => ({
     opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.12, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as const },
+    transition: { delay: i * 0.1, duration: 0.5 },
   }),
 };
 
@@ -197,9 +196,9 @@ export default function Home() {
           <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
             {/* Photo */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
               className="relative flex-shrink-0"
             >
               <div className="w-52 h-52 md:w-72 md:h-72 rounded-3xl overflow-hidden border theme-border relative">
@@ -211,9 +210,9 @@ export default function Home() {
             {/* Text */}
             <div className="text-center lg:text-left flex-1">
               <motion.p
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
                 className="text-sm font-medium tracking-widest uppercase mb-4"
                 style={{ color: blue }}
               >
@@ -221,9 +220,9 @@ export default function Home() {
               </motion.p>
 
               <motion.h1
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
                 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.95] mb-6"
               >
                 Aimar
@@ -253,9 +252,9 @@ export default function Home() {
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.4, duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.4, duration: 0.5 }}
                 className="flex gap-4 mt-8 justify-center lg:justify-start"
               >
                 <a href="#work" className="px-7 py-3 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105" style={{ background: blue }}>
@@ -274,10 +273,10 @@ export default function Home() {
       <section id="work" className="px-6 md:px-12 py-32">
         <div className="max-w-6xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.5 }}
             className="flex items-end justify-between mb-16"
           >
             <div>
@@ -300,7 +299,7 @@ export default function Home() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
-                variants={fadeUp}
+                variants={fadeIn}
                 className="group rounded-2xl border theme-border theme-card hover-card transition-all duration-300 overflow-hidden relative"
               >
                 {isViewed && (
@@ -455,10 +454,10 @@ export default function Home() {
       <section id="skills" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-6xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.5 }}
             className="mb-16"
           >
             <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
@@ -475,9 +474,8 @@ export default function Home() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
-                variants={fadeUp}
-                whileHover={{ y: -4, borderColor: "rgba(20,110,245,0.3)" }}
-                className="flex flex-col items-center gap-3 py-6 px-4 rounded-xl border theme-border theme-card transition-all duration-200 cursor-default"
+                variants={fadeIn}
+                className="flex flex-col items-center gap-3 py-6 px-4 rounded-xl border theme-border theme-card hover:border-[#146EF5]/30 transition-all duration-200 cursor-default"
               >
                 <span className="text-2xl theme-text-secondary">{s.icon}</span>
                 <span className="text-xs font-medium theme-text-secondary">{s.name}</span>
@@ -593,7 +591,7 @@ export default function Home() {
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
-                    variants={fadeUp}
+                    variants={fadeIn}
                   >
                     {cert.link ? (
                       <a
@@ -688,7 +686,7 @@ export default function Home() {
                 initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
-                variants={fadeUp}
+                variants={fadeIn}
                 className="relative pl-8 pb-12 last:pb-0"
               >
                 {/* Timeline dot */}
@@ -723,10 +721,10 @@ export default function Home() {
       <section id="about" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-4xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.5 }}
           >
             <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>About</p>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">
@@ -754,10 +752,10 @@ export default function Home() {
       <section id="contact" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.5 }}
           >
             <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
               Contact
