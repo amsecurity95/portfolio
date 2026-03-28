@@ -1,7 +1,6 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ArrowUpRight, MapPin, Mail, Shield, Monitor, Brain, Palette, GraduationCap, Award, ExternalLink, Check, Sun, Moon } from "lucide-react";
 import { SiGithub } from "react-icons/si";
@@ -100,33 +99,7 @@ const skills = [
   { name: "Claude Code", icon: <TbTerminal2 /> },
 ];
 
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: (i: number) => ({
-    opacity: 1,
-    transition: { delay: i * 0.1, duration: 0.5 },
-  }),
-};
-
-function Typewriter({ text }: { text: string }) {
-  const [display, setDisplay] = useState("");
-  useEffect(() => {
-    let i = 0;
-    const iv = setInterval(() => {
-      if (i <= text.length) { setDisplay(text.slice(0, i)); i++; }
-      else clearInterval(iv);
-    }, 40);
-    return () => clearInterval(iv);
-  }, [text]);
-  return <>{display}<span className="animate-pulse" style={{ color: blue }}>|</span></>;
-}
-
 export default function Home() {
-  const heroRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
-  const heroOpacity = useTransform(scrollYProgress, [0, 1], [1, 0]);
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, 100]);
-
   const [theme, setTheme] = useState<"dark"|"light">("dark");
   useEffect(() => {
     const saved = localStorage.getItem("portfolio_theme") as "dark"|"light"|null;
@@ -147,7 +120,6 @@ export default function Home() {
     try {
       const stored = JSON.parse(localStorage.getItem("portfolio_viewed") || "[]");
       if (Array.isArray(stored)) setViewed(new Set(stored));
-      // Clear after loading so checks disappear on next refresh
       localStorage.removeItem("portfolio_viewed");
     } catch {}
   }, []);
@@ -191,115 +163,76 @@ export default function Home() {
       </nav>
 
       {/* ─── HERO ─── */}
-      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center pt-20 px-6 md:px-12 overflow-hidden">
-        <motion.div style={{ opacity: heroOpacity, y: heroY }} className="max-w-5xl mx-auto w-full">
+      <section className="relative min-h-screen flex items-center justify-center pt-20 px-6 md:px-12 overflow-hidden">
+        <div className="max-w-5xl mx-auto w-full">
           <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
             {/* Photo */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6 }}
-              className="relative flex-shrink-0"
-            >
+            <div className="relative flex-shrink-0">
               <div className="w-52 h-52 md:w-72 md:h-72 rounded-3xl overflow-hidden border theme-border relative">
                 <Image src="/aimar.jpg" alt="Aimar Mwembo" fill className="object-cover object-top" priority />
               </div>
               <div className="absolute -inset-1 rounded-3xl -z-10 opacity-30 blur-2xl" style={{ background: blue }} />
-            </motion.div>
+            </div>
 
             {/* Text */}
             <div className="text-center lg:text-left flex-1">
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2, duration: 0.5 }}
+              <p
                 className="text-sm font-medium tracking-widest uppercase mb-4"
                 style={{ color: blue }}
               >
                 AI Automation & Prompt Engineer
-              </motion.p>
+              </p>
 
-              <motion.h1
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.95] mb-6"
-              >
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.95] mb-6">
                 Aimar
                 <br />
                 Mwembo
-              </motion.h1>
+              </h1>
 
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.8, duration: 0.8 }}
-                className="text-lg md:text-xl theme-text-secondary font-light max-w-lg mb-4"
-              >
-                <Typewriter text="I don't just write code — I build systems that save companies time and money." />
-              </motion.p>
+              <p className="text-lg md:text-xl theme-text-secondary font-light max-w-lg mb-4">
+                I don&apos;t just write code — I build systems that save companies time and money.
+              </p>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.2, duration: 0.6 }}
-                className="flex items-center gap-3 justify-center lg:justify-start text-sm theme-text-muted"
-              >
+              <div className="flex items-center gap-3 justify-center lg:justify-start text-sm theme-text-muted">
                 <MapPin size={14} />
                 <span>Champaign-Urbana, IL</span>
                 <span className="theme-text-faint">|</span>
                 <span>Open to Remote</span>
-              </motion.div>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.4, duration: 0.5 }}
-                className="flex gap-4 mt-8 justify-center lg:justify-start"
-              >
+              <div className="flex gap-4 mt-8 justify-center lg:justify-start">
                 <a href="#work" className="px-7 py-3 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105" style={{ background: blue }}>
                   View work
                 </a>
                 <a href="#contact" className="px-7 py-3 rounded-full text-sm font-semibold border border-white/[0.12] theme-text hover:theme-icon-box transition-all duration-200">
                   Contact
                 </a>
-              </motion.div>
+              </div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* ─── WORK ─── */}
       <section id="work" className="px-6 md:px-12 py-32">
         <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="flex items-end justify-between mb-16"
-          >
+          <div className="flex items-end justify-between mb-16">
             <div>
               <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
                 Selected work
               </p>
               <h2 className="text-4xl md:text-6xl font-bold tracking-tight">Projects</h2>
             </div>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {projects.map((p, i) => {
+            {projects.map((p) => {
               const Wrapper = p.link ? "a" : "div";
               const wrapperProps = p.link ? { href: p.link, onClick: () => markViewed(p.name) } : {};
               const isViewed = viewed.has(p.name);
               return (
-              <motion.div
+              <div
                 key={p.name}
-                custom={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeIn}
                 className="group rounded-2xl border theme-border theme-card hover-card transition-all duration-300 overflow-hidden relative"
               >
                 {isViewed && (
@@ -336,7 +269,7 @@ export default function Home() {
                     <span className="text-xs font-medium" style={{ color: blue }}>{p.metric}</span>
                   </div>
                 </Wrapper>
-              </motion.div>
+              </div>
               );
             })}
           </div>
@@ -349,156 +282,132 @@ export default function Home() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#146EF5]/[0.04] rounded-full blur-[120px] pointer-events-none" />
 
         <div className="max-w-6xl mx-auto relative z-10">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="flex flex-col lg:flex-row gap-16 items-center">
-              {/* Left — Kayou info */}
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-14 h-14 rounded-2xl overflow-hidden relative theme-icon-box border theme-border">
-                    <Image src="/kayou-logo.png" alt="Kayou" fill className="object-cover" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium tracking-widest uppercase" style={{ color: blue }}>Featured Project</p>
-                    <h2 className="text-2xl font-bold theme-text">Kayou AI</h2>
-                  </div>
+          <div className="flex flex-col lg:flex-row gap-16 items-center">
+            {/* Left — Kayou info */}
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-14 h-14 rounded-2xl overflow-hidden relative theme-icon-box border theme-border">
+                  <Image src="/kayou-logo.png" alt="Kayou" fill className="object-cover" />
                 </div>
-
-                <h3 className="text-3xl md:text-4xl font-bold tracking-tight theme-text leading-tight mb-6">
-                  I built my own AI — from training the model to deploying it.
-                </h3>
-
-                <p className="theme-text-secondary text-base leading-relaxed mb-8">
-                  Kayou is not a wrapper around ChatGPT. I fine-tuned a 32-billion parameter model from scratch,
-                  built a multi-agent orchestration platform around it, and created a social media SaaS product powered by AI agents.
-                </p>
-
-                <div className="grid grid-cols-2 gap-4 mb-8">
-                  {[
-                    { value: "32B", label: "Parameter custom LLM" },
-                    { value: "9", label: "Specialized AI agents" },
-                    { value: "5,400+", label: "Training examples" },
-                    { value: "4", label: "Languages supported" },
-                  ].map((stat) => (
-                    <div key={stat.label} className="p-4 rounded-xl border theme-border theme-card">
-                      <p className="text-2xl font-bold theme-text">{stat.value}</p>
-                      <p className="text-xs theme-text-muted mt-1">{stat.label}</p>
-                    </div>
-                  ))}
+                <div>
+                  <p className="text-sm font-medium tracking-widest uppercase" style={{ color: blue }}>Featured Project</p>
+                  <h2 className="text-2xl font-bold theme-text">Kayou AI</h2>
                 </div>
-
-                <a
-                  href="/kayou"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold theme-text transition-all duration-200 hover:scale-105"
-                  style={{ background: blue }}
-                >
-                  Talk to Kayou
-                  <ArrowUpRight size={16} />
-                </a>
               </div>
 
-              {/* Right — The 3 Kayou products */}
-              <div className="flex-1 space-y-4 w-full">
+              <h3 className="text-3xl md:text-4xl font-bold tracking-tight theme-text leading-tight mb-6">
+                I built my own AI — from training the model to deploying it.
+              </h3>
+
+              <p className="theme-text-secondary text-base leading-relaxed mb-8">
+                Kayou is not a wrapper around ChatGPT. I fine-tuned a 32-billion parameter model from scratch,
+                built a multi-agent orchestration platform around it, and created a social media SaaS product powered by AI agents.
+              </p>
+
+              <div className="grid grid-cols-2 gap-4 mb-8">
                 {[
-                  {
-                    title: "Kayou LLM",
-                    desc: "Custom fine-tuned model trained with SFT + DPO. Speaks English, French, Lingala, and Swahili.",
-                    href: "/kayou",
-                    accent: "#146EF5",
-                    icon: "/kayou-logo.png",
-                  },
-                  {
-                    title: "Kayou Chat",
-                    desc: "9-agent platform with persistent memory, mentor learning, and real-time cooperation between agents.",
-                    href: "/kayou-chat",
-                    accent: "#4ade80",
-                    icon: "/projects/kayou-chat.png",
-                  },
-                  {
-                    title: "Kayou Social",
-                    desc: "AI social media SaaS — content generation, scheduling, analytics, and Remotion video creation.",
-                    href: "/kayou-social",
-                    accent: "#E91E8C",
-                    icon: "/projects/kayou-social.png",
-                  },
-                ].map((product) => (
-                  <a
-                    key={product.title}
-                    href={product.href}
-                    className="group flex items-start gap-4 p-5 rounded-xl border theme-border theme-card hover-card transition-all duration-300"
-                  >
-                    <div className="w-12 h-12 rounded-xl overflow-hidden relative theme-icon-box border theme-border flex-shrink-0">
-                      <Image src={product.icon} alt={product.title} fill className="object-cover" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="theme-text font-semibold text-sm group-hover:text-[#146EF5] transition-colors flex items-center gap-2">
-                        {product.title}
-                        <ArrowUpRight size={14} className="theme-text-faint group-hover:theme-text transition-colors" />
-                      </h4>
-                      <p className="theme-text-muted text-xs mt-1 leading-relaxed">{product.desc}</p>
-                    </div>
-                    <div className="w-1.5 h-8 rounded-full mt-1" style={{ background: product.accent, opacity: 0.6 }} />
-                  </a>
+                  { value: "32B", label: "Parameter custom LLM" },
+                  { value: "9", label: "Specialized AI agents" },
+                  { value: "5,400+", label: "Training examples" },
+                  { value: "4", label: "Languages supported" },
+                ].map((stat) => (
+                  <div key={stat.label} className="p-4 rounded-xl border theme-border theme-card">
+                    <p className="text-2xl font-bold theme-text">{stat.value}</p>
+                    <p className="text-xs theme-text-muted mt-1">{stat.label}</p>
+                  </div>
                 ))}
               </div>
+
+              <a
+                href="/kayou"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold theme-text transition-all duration-200 hover:scale-105"
+                style={{ background: blue }}
+              >
+                Talk to Kayou
+                <ArrowUpRight size={16} />
+              </a>
             </div>
-          </motion.div>
+
+            {/* Right — The 3 Kayou products */}
+            <div className="flex-1 space-y-4 w-full">
+              {[
+                {
+                  title: "Kayou LLM",
+                  desc: "Custom fine-tuned model trained with SFT + DPO. Speaks English, French, Lingala, and Swahili.",
+                  href: "/kayou",
+                  accent: "#146EF5",
+                  icon: "/kayou-logo.png",
+                },
+                {
+                  title: "Kayou Chat",
+                  desc: "9-agent platform with persistent memory, mentor learning, and real-time cooperation between agents.",
+                  href: "/kayou-chat",
+                  accent: "#4ade80",
+                  icon: "/projects/kayou-chat.png",
+                },
+                {
+                  title: "Kayou Social",
+                  desc: "AI social media SaaS — content generation, scheduling, analytics, and Remotion video creation.",
+                  href: "/kayou-social",
+                  accent: "#E91E8C",
+                  icon: "/projects/kayou-social.png",
+                },
+              ].map((product) => (
+                <a
+                  key={product.title}
+                  href={product.href}
+                  className="group flex items-start gap-4 p-5 rounded-xl border theme-border theme-card hover-card transition-all duration-300"
+                >
+                  <div className="w-12 h-12 rounded-xl overflow-hidden relative theme-icon-box border theme-border flex-shrink-0">
+                    <Image src={product.icon} alt={product.title} fill className="object-cover" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="theme-text font-semibold text-sm group-hover:text-[#146EF5] transition-colors flex items-center gap-2">
+                      {product.title}
+                      <ArrowUpRight size={14} className="theme-text-faint group-hover:theme-text transition-colors" />
+                    </h4>
+                    <p className="theme-text-muted text-xs mt-1 leading-relaxed">{product.desc}</p>
+                  </div>
+                  <div className="w-1.5 h-8 rounded-full mt-1" style={{ background: product.accent, opacity: 0.6 }} />
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ─── SKILLS ─── */}
       <section id="skills" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="mb-16"
-          >
+          <div className="mb-16">
             <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
               Toolkit
             </p>
             <h2 className="text-4xl md:text-6xl font-bold tracking-tight">Skills</h2>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {skills.map((s, i) => (
-              <motion.div
+            {skills.map((s) => (
+              <div
                 key={s.name}
-                custom={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeIn}
                 className="flex flex-col items-center gap-3 py-6 px-4 rounded-xl border theme-border theme-card hover:border-[#146EF5]/30 transition-all duration-200 cursor-default"
               >
                 <span className="text-2xl theme-text-secondary">{s.icon}</span>
                 <span className="text-xs font-medium theme-text-secondary">{s.name}</span>
-              </motion.div>
+              </div>
             ))}
           </div>
 
           {/* Certifications & Education */}
           <div className="mt-24">
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="mb-10"
-            >
+            <div className="mb-10">
               <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
                 Credentials
               </p>
               <h3 className="text-3xl md:text-4xl font-bold tracking-tight theme-text">
                 Certifications & Education
               </h3>
-            </motion.div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {[
@@ -551,7 +460,7 @@ export default function Home() {
                   type: "Degree",
                   color: "#146EF5",
                 },
-              ].map((cert, i) => {
+              ].map((cert) => {
                 const inner = (
                   <>
                     <div
@@ -584,30 +493,20 @@ export default function Home() {
                   </>
                 );
 
-                return (
-                  <motion.div
+                return cert.link ? (
+                  <a
                     key={cert.name}
-                    custom={i}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true }}
-                    variants={fadeIn}
+                    href={cert.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-4 p-5 rounded-xl border theme-border theme-card hover-card theme-border-hover transition-all duration-300"
                   >
-                    {cert.link ? (
-                      <a
-                        href={cert.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group flex items-center gap-4 p-5 rounded-xl border theme-border theme-card hover-card theme-border-hover transition-all duration-300"
-                      >
-                        {inner}
-                      </a>
-                    ) : (
-                      <div className="group flex items-center gap-4 p-5 rounded-xl border theme-border theme-card hover-card transition-all duration-300">
-                        {inner}
-                      </div>
-                    )}
-                  </motion.div>
+                    {inner}
+                  </a>
+                ) : (
+                  <div key={cert.name} className="group flex items-center gap-4 p-5 rounded-xl border theme-border theme-card hover-card transition-all duration-300">
+                    {inner}
+                  </div>
                 );
               })}
             </div>
@@ -618,18 +517,12 @@ export default function Home() {
       {/* ─── EXPERIENCE ─── */}
       <section id="experience" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="mb-12"
-          >
+          <div className="mb-12">
             <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
               Career
             </p>
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight theme-text">Experience</h2>
-          </motion.div>
+          </div>
 
           <div className="relative">
             {/* Timeline line */}
@@ -679,14 +572,9 @@ export default function Home() {
                   "Maintained a 95%+ first-time fix rate across data center and on-site service calls",
                 ],
               },
-            ].map((job, i) => (
-              <motion.div
+            ].map((job) => (
+              <div
                 key={job.company}
-                custom={i}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeIn}
                 className="relative pl-8 pb-12 last:pb-0"
               >
                 {/* Timeline dot */}
@@ -711,7 +599,7 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -720,73 +608,59 @@ export default function Home() {
       {/* ─── ABOUT ─── */}
       <section id="about" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>About</p>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">
-              Building at the intersection of AI and engineering.
-            </h2>
-            <div className="space-y-5 theme-text-secondary text-lg leading-relaxed">
-              <p>
-                I&apos;m an AI Automation & Prompt Engineer with a track record of building systems that dramatically cut operational costs.
-                My work spans custom LLMs, multi-agent platforms, mobile apps, and process automation.
-              </p>
-              <p>
-                I trained my own large language model on Qwen2.5-32B, built a 9-agent AI orchestration platform,
-                published an app on the iOS App Store, and automated an 8-hour manufacturing process down to 5 minutes.
-              </p>
-              <p>
-                I speak English, French, Lingala, and Swahili. I&apos;m based in Champaign-Urbana, IL and open to
-                remote roles and on-site opportunities.
-              </p>
-            </div>
-          </motion.div>
+          <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>About</p>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">
+            Building at the intersection of AI and engineering.
+          </h2>
+          <div className="space-y-5 theme-text-secondary text-lg leading-relaxed">
+            <p>
+              I&apos;m an AI Automation & Prompt Engineer with a track record of building systems that dramatically cut operational costs.
+              My work spans custom LLMs, multi-agent platforms, mobile apps, and process automation.
+            </p>
+            <p>
+              I trained my own large language model on Qwen2.5-32B, built a 9-agent AI orchestration platform,
+              published an app on the iOS App Store, and automated an 8-hour manufacturing process down to 5 minutes.
+            </p>
+            <p>
+              I speak English, French, Lingala, and Swahili. I&apos;m based in Champaign-Urbana, IL and open to
+              remote roles and on-site opportunities.
+            </p>
+          </div>
         </div>
       </section>
 
       {/* ─── CONTACT ─── */}
       <section id="contact" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
-              Contact
-            </p>
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-              Let&apos;s work together.
-            </h2>
-            <p className="theme-text-secondary text-lg mb-10 max-w-xl mx-auto">
-              Looking for an AI engineer who ships production systems? I&apos;m available as a contractor, consultant, or for full-time roles.
-            </p>
+          <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
+            Contact
+          </p>
+          <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+            Let&apos;s work together.
+          </h2>
+          <p className="theme-text-secondary text-lg mb-10 max-w-xl mx-auto">
+            Looking for an AI engineer who ships production systems? I&apos;m available as a contractor, consultant, or for full-time roles.
+          </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <a
-                href="mailto:aimarmwe@gmail.com"
-                className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105"
-                style={{ background: blue }}
-              >
-                <Mail size={16} />
-                aimarmwe@gmail.com
-              </a>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <a
+              href="mailto:aimarmwe@gmail.com"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105"
+              style={{ background: blue }}
+            >
+              <Mail size={16} />
+              aimarmwe@gmail.com
+            </a>
+          </div>
 
-            <div className="flex justify-center gap-6">
-              <a href="https://github.com/amsecurity95" target="_blank" rel="noopener noreferrer" className="theme-text-muted hover:theme-text transition-colors duration-200">
-                <SiGithub size={22} />
-              </a>
-              <a href="https://linkedin.com/in/amsecurity95" target="_blank" rel="noopener noreferrer" className="theme-text-muted hover:theme-text transition-colors duration-200">
-                <FaLinkedinIn size={22} />
-              </a>
-            </div>
-          </motion.div>
+          <div className="flex justify-center gap-6">
+            <a href="https://github.com/amsecurity95" target="_blank" rel="noopener noreferrer" className="theme-text-muted hover:theme-text transition-colors duration-200">
+              <SiGithub size={22} />
+            </a>
+            <a href="https://linkedin.com/in/amsecurity95" target="_blank" rel="noopener noreferrer" className="theme-text-muted hover:theme-text transition-colors duration-200">
+              <FaLinkedinIn size={22} />
+            </a>
+          </div>
         </div>
       </section>
 
