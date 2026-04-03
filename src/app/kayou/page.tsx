@@ -162,37 +162,48 @@ export default function KayouPage() {
       </div>
 
       {/* Dark blue wave effect */}
-      <div className="relative w-full overflow-hidden pointer-events-none" style={{ height: 80 }}>
-        <svg className="absolute bottom-0 w-full" viewBox="0 0 1440 80" preserveAspectRatio="none" style={{ minWidth: '100%' }}>
+      <div className="relative w-full pointer-events-none" style={{ height: 120 }}>
+        <svg className="absolute bottom-0 w-full h-full" viewBox="0 0 1440 120" preserveAspectRatio="none">
           <defs>
             <linearGradient id="waveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#0A2463" stopOpacity="0.6" />
-              <stop offset="50%" stopColor="#146EF5" stopOpacity="0.3" />
-              <stop offset="100%" stopColor="#0A2463" stopOpacity="0.6" />
+              <stop offset="0%" stopColor="#0A2463" />
+              <stop offset="50%" stopColor="#1a56db" />
+              <stop offset="100%" stopColor="#0A2463" />
             </linearGradient>
             <linearGradient id="waveGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#146EF5" stopOpacity="0.2" />
-              <stop offset="50%" stopColor="#0A2463" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#146EF5" stopOpacity="0.2" />
+              <stop offset="0%" stopColor="#1e3a8a" />
+              <stop offset="50%" stopColor="#146EF5" />
+              <stop offset="100%" stopColor="#1e3a8a" />
+            </linearGradient>
+            <linearGradient id="waveGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#0A2463" stopOpacity="0" />
+              <stop offset="100%" stopColor="#0A2463" stopOpacity="0.8" />
             </linearGradient>
           </defs>
-          <path fill="url(#waveGrad2)" d="M0,50 C360,80 720,20 1080,50 C1260,65 1380,40 1440,45 L1440,80 L0,80Z">
+          <rect fill="url(#waveGrad3)" width="1440" height="120" />
+          <path fill="#0A2463" opacity="0.7" d="M0,70 C360,100 720,40 1080,70 C1260,85 1380,60 1440,65 L1440,120 L0,120Z">
             <animate attributeName="d" dur="8s" repeatCount="indefinite" values="
-              M0,50 C360,80 720,20 1080,50 C1260,65 1380,40 1440,45 L1440,80 L0,80Z;
-              M0,45 C360,20 720,75 1080,40 C1260,30 1380,60 1440,50 L1440,80 L0,80Z;
-              M0,50 C360,80 720,20 1080,50 C1260,65 1380,40 1440,45 L1440,80 L0,80Z" />
+              M0,70 C360,100 720,40 1080,70 C1260,85 1380,60 1440,65 L1440,120 L0,120Z;
+              M0,60 C360,35 720,95 1080,55 C1260,45 1380,80 1440,70 L1440,120 L0,120Z;
+              M0,70 C360,100 720,40 1080,70 C1260,85 1380,60 1440,65 L1440,120 L0,120Z" />
           </path>
-          <path fill="url(#waveGrad1)" d="M0,55 C480,30 960,70 1440,50 L1440,80 L0,80Z">
+          <path fill="url(#waveGrad2)" opacity="0.5" d="M0,80 C480,50 960,100 1440,75 L1440,120 L0,120Z">
             <animate attributeName="d" dur="6s" repeatCount="indefinite" values="
-              M0,55 C480,30 960,70 1440,50 L1440,80 L0,80Z;
-              M0,40 C480,70 960,25 1440,55 L1440,80 L0,80Z;
-              M0,55 C480,30 960,70 1440,50 L1440,80 L0,80Z" />
+              M0,80 C480,50 960,100 1440,75 L1440,120 L0,120Z;
+              M0,65 C480,95 960,45 1440,80 L1440,120 L0,120Z;
+              M0,80 C480,50 960,100 1440,75 L1440,120 L0,120Z" />
+          </path>
+          <path fill="url(#waveGrad1)" opacity="0.6" d="M0,90 C240,75 720,105 1200,85 C1350,80 1440,90 1440,90 L1440,120 L0,120Z">
+            <animate attributeName="d" dur="10s" repeatCount="indefinite" values="
+              M0,90 C240,75 720,105 1200,85 C1350,80 1440,90 1440,90 L1440,120 L0,120Z;
+              M0,85 C240,100 720,70 1200,95 C1350,100 1440,85 1440,85 L1440,120 L0,120Z;
+              M0,90 C240,75 720,105 1200,85 C1350,80 1440,90 1440,90 L1440,120 L0,120Z" />
           </path>
         </svg>
       </div>
 
       {/* Input bar */}
-      <div className="border-t border-white/[0.06] px-6 py-4" style={{ background: 'linear-gradient(to top, rgba(10,36,99,0.15), transparent)' }}>
+      <div className="px-6 py-4" style={{ background: 'linear-gradient(to bottom, #0A2463, #050d1f)' }}>
         <div className="max-w-2xl mx-auto flex gap-3">
           <input
             ref={inputRef}
