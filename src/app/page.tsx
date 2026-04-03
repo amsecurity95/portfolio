@@ -12,7 +12,6 @@ import {
 import { TbDatabase, TbBrandReactNative, TbTerminal2 } from "react-icons/tb";
 import WelcomeOverlay from "@/components/WelcomeOverlay";
 import LiquidWaves from "@/components/LiquidWaves";
-import DarkWaves from "@/components/DarkWaves";
 
 const blue = "#146EF5";
 
@@ -138,7 +137,6 @@ export default function Home() {
     <>
     <WelcomeOverlay />
     {theme === "light" && <LiquidWaves />}
-    {theme === "dark" && <DarkWaves />}
     <main>
       {/* ─── NAV ─── */}
       <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-12 py-4 md:py-5 flex items-center justify-between theme-nav backdrop-blur-xl border-b theme-border transition-colors duration-300">
