@@ -171,7 +171,7 @@ export default function Home() {
             {/* Photo */}
             <div className="relative flex-shrink-0">
               <div className="w-52 h-52 md:w-72 md:h-72 rounded-3xl overflow-hidden border theme-border relative">
-                <Image src="/aimar.jpg" alt="Aimar M" fill className="object-cover object-top" priority />
+                <Image src="/aimar.jpg" alt="Aimar" fill className="object-cover object-top" priority />
               </div>
               <div className="absolute -inset-1 rounded-3xl -z-10 opacity-30 blur-2xl" style={{ background: blue }} />
             </div>
@@ -667,7 +667,7 @@ export default function Home() {
       {/* ─── FOOTER ─── */}
       <footer className="px-6 md:px-12 py-8 border-t theme-border">
         <div className="max-w-6xl mx-auto flex items-center justify-between text-xs theme-text-faint">
-          <span>&copy; 2026 Aimar M</span>
+          <span>&copy; 2026 Aimar</span>
           <span>Built with Next.js & Claude</span>
         </div>
       </footer>
