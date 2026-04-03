@@ -12,6 +12,7 @@ import {
 import { TbDatabase, TbBrandReactNative, TbTerminal2 } from "react-icons/tb";
 import WelcomeOverlay from "@/components/WelcomeOverlay";
 import LiquidWaves from "@/components/LiquidWaves";
+import ScrollReveal, { ScrollRevealText } from "@/components/ScrollReveal";
 
 const blue = "#146EF5";
 
@@ -169,45 +170,57 @@ export default function Home() {
         <div className="max-w-5xl mx-auto w-full">
           <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-20">
             {/* Photo */}
-            <div className="relative flex-shrink-0">
-              <div className="w-52 h-52 md:w-72 md:h-72 rounded-3xl overflow-hidden border theme-border relative">
-                <Image src="/aimar.jpg" alt="Aimar" fill className="object-cover object-top" priority />
+            <ScrollReveal delay={0.2} y={40} scale={0.95}>
+              <div className="relative flex-shrink-0">
+                <div className="w-52 h-52 md:w-72 md:h-72 rounded-3xl overflow-hidden border theme-border relative">
+                  <Image src="/aimar.jpg" alt="Aimar" fill className="object-cover object-top" priority />
+                </div>
+                <div className="absolute -inset-1 rounded-3xl -z-10 opacity-30 blur-2xl" style={{ background: blue }} />
               </div>
-              <div className="absolute -inset-1 rounded-3xl -z-10 opacity-30 blur-2xl" style={{ background: blue }} />
-            </div>
+            </ScrollReveal>
 
             {/* Text */}
             <div className="text-center lg:text-left flex-1">
-              <p
-                className="text-sm font-medium tracking-widest uppercase mb-4"
-                style={{ color: blue }}
-              >
-                AI Automation Engineer
-              </p>
+              <ScrollRevealText delay={0.3}>
+                <p
+                  className="text-sm font-medium tracking-widest uppercase mb-4"
+                  style={{ color: blue }}
+                >
+                  AI Automation Engineer
+                </p>
+              </ScrollRevealText>
 
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.95] mb-6">
-                Aimar
-              </h1>
+              <ScrollRevealText delay={0.4}>
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.95] mb-6">
+                  Aimar
+                </h1>
+              </ScrollRevealText>
 
-              <p className="text-lg md:text-xl theme-text-secondary font-light max-w-lg mb-4">
-                I&apos;ve built several automation web apps and mobile applications for companies in Illinois to automate their workflow. Try out my AI Kayou that I built and trained.
-              </p>
+              <ScrollRevealText delay={0.5}>
+                <p className="text-lg md:text-xl theme-text-secondary font-light max-w-lg mb-4">
+                  I&apos;ve built several automation web apps and mobile applications for companies in Illinois to automate their workflow. Try out my AI Kayou that I built and trained.
+                </p>
+              </ScrollRevealText>
 
-              <div className="flex items-center gap-3 justify-center lg:justify-start text-sm theme-text-muted">
-                <MapPin size={14} />
-                <span>Illinois, USA</span>
-                <span className="theme-text-faint">|</span>
-                <span>Open to Remote</span>
-              </div>
+              <ScrollRevealText delay={0.6}>
+                <div className="flex items-center gap-3 justify-center lg:justify-start text-sm theme-text-muted">
+                  <MapPin size={14} />
+                  <span>Illinois, USA</span>
+                  <span className="theme-text-faint">|</span>
+                  <span>Open to Remote</span>
+                </div>
+              </ScrollRevealText>
 
-              <div className="flex gap-4 mt-8 justify-center lg:justify-start">
-                <a href="/kayou" className="px-7 py-3 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105" style={{ background: blue }}>
-                  Talk to Kayou AI
-                </a>
-                <a href="#contact" className="px-7 py-3 rounded-full text-sm font-semibold border border-white/[0.12] theme-text hover:theme-icon-box transition-all duration-200">
-                  Contact
-                </a>
-              </div>
+              <ScrollRevealText delay={0.7}>
+                <div className="flex gap-4 mt-8 justify-center lg:justify-start">
+                  <a href="/kayou" className="px-7 py-3 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105" style={{ background: blue }}>
+                    Talk to Kayou AI
+                  </a>
+                  <a href="#contact" className="px-7 py-3 rounded-full text-sm font-semibold border border-white/[0.12] theme-text hover:theme-icon-box transition-all duration-200">
+                    Contact
+                  </a>
+                </div>
+              </ScrollRevealText>
             </div>
           </div>
         </div>
@@ -216,24 +229,26 @@ export default function Home() {
       {/* ─── WORK ─── */}
       <section id="work" className="px-6 md:px-12 py-32">
         <div className="max-w-6xl mx-auto">
-          <div className="flex items-end justify-between mb-16">
-            <div>
-              <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
-                Selected work
-              </p>
-              <h2 className="text-4xl md:text-6xl font-bold tracking-tight">Projects</h2>
+          <ScrollRevealText>
+            <div className="flex items-end justify-between mb-16">
+              <div>
+                <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
+                  Selected work
+                </p>
+                <h2 className="text-4xl md:text-6xl font-bold tracking-tight">Projects</h2>
+              </div>
             </div>
-          </div>
+          </ScrollRevealText>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {projects.map((p) => {
+            {projects.map((p, i) => {
               const Wrapper = p.link ? "a" : "div";
               const wrapperProps = p.link ? { href: p.link, onClick: () => markViewed(p.name) } : {};
               const isViewed = viewed.has(p.name);
               return (
+              <ScrollReveal key={p.name} delay={i * 0.1} y={50}>
               <div
-                key={p.name}
-                className="group rounded-2xl border theme-border theme-card hover-card transition-all duration-300 overflow-hidden relative"
+                className="group rounded-2xl border theme-border theme-card hover-card transition-all duration-300 overflow-hidden relative h-full"
               >
                 {isViewed && (
                   <div className="absolute top-3 right-3 z-10 w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "#10B981" }}>
@@ -270,6 +285,7 @@ export default function Home() {
                   </div>
                 </Wrapper>
               </div>
+              </ScrollReveal>
               );
             })}
           </div>
@@ -284,7 +300,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="flex flex-col lg:flex-row gap-16 items-center">
             {/* Left — Kayou info */}
-            <div className="flex-1">
+            <ScrollReveal className="flex-1" y={80}>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-14 h-14 rounded-2xl overflow-hidden relative theme-icon-box border theme-border">
                   <Image src="/kayou-logo.png" alt="Kayou" fill className="object-cover" />
@@ -326,7 +342,7 @@ export default function Home() {
                 Talk to Kayou
                 <ArrowUpRight size={16} />
               </a>
-            </div>
+            </ScrollReveal>
 
             {/* Right — The 3 Kayou products */}
             <div className="flex-1 space-y-4 w-full">
@@ -352,9 +368,9 @@ export default function Home() {
                   accent: "#E91E8C",
                   icon: "/projects/kayou-social.png",
                 },
-              ].map((product) => (
+              ].map((product, i) => (
+                <ScrollReveal key={product.title} delay={0.15 + i * 0.12} y={40}>
                 <a
-                  key={product.title}
                   href={product.href}
                   className="group flex items-start gap-4 p-5 rounded-xl border theme-border theme-card hover-card transition-all duration-300"
                 >
@@ -370,6 +386,7 @@ export default function Home() {
                   </div>
                   <div className="w-1.5 h-8 rounded-full mt-1" style={{ background: product.accent, opacity: 0.6 }} />
                 </a>
+                </ScrollReveal>
               ))}
             </div>
           </div>
@@ -379,35 +396,41 @@ export default function Home() {
       {/* ─── SKILLS ─── */}
       <section id="skills" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-16">
-            <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
-              Toolkit
-            </p>
-            <h2 className="text-4xl md:text-6xl font-bold tracking-tight">Skills</h2>
-          </div>
+          <ScrollRevealText>
+            <div className="mb-16">
+              <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
+                Toolkit
+              </p>
+              <h2 className="text-4xl md:text-6xl font-bold tracking-tight">Skills</h2>
+            </div>
+          </ScrollRevealText>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {skills.map((s) => (
-              <div
-                key={s.name}
-                className="flex flex-col items-center gap-3 py-6 px-4 rounded-xl border theme-border theme-card hover:border-[#146EF5]/30 transition-all duration-200 cursor-default"
-              >
-                <span className="text-2xl theme-text-secondary">{s.icon}</span>
-                <span className="text-xs font-medium theme-text-secondary">{s.name}</span>
-              </div>
-            ))}
-          </div>
+          <ScrollReveal y={40}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {skills.map((s) => (
+                <div
+                  key={s.name}
+                  className="flex flex-col items-center gap-3 py-6 px-4 rounded-xl border theme-border theme-card hover:border-[#146EF5]/30 transition-all duration-200 cursor-default"
+                >
+                  <span className="text-2xl theme-text-secondary">{s.icon}</span>
+                  <span className="text-xs font-medium theme-text-secondary">{s.name}</span>
+                </div>
+              ))}
+            </div>
+          </ScrollReveal>
 
           {/* Certifications & Education */}
           <div className="mt-24">
-            <div className="mb-10">
-              <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
-                Credentials
-              </p>
-              <h3 className="text-3xl md:text-4xl font-bold tracking-tight theme-text">
-                Certifications & Education
-              </h3>
-            </div>
+            <ScrollRevealText>
+              <div className="mb-10">
+                <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
+                  Credentials
+                </p>
+                <h3 className="text-3xl md:text-4xl font-bold tracking-tight theme-text">
+                  Certifications & Education
+                </h3>
+              </div>
+            </ScrollRevealText>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {[
@@ -517,12 +540,14 @@ export default function Home() {
       {/* ─── EXPERIENCE ─── */}
       <section id="experience" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-4xl mx-auto">
-          <div className="mb-12">
-            <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
-              Career
-            </p>
-            <h2 className="text-4xl md:text-5xl font-bold tracking-tight theme-text">Experience</h2>
-          </div>
+          <ScrollRevealText>
+            <div className="mb-12">
+              <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
+                Career
+              </p>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight theme-text">Experience</h2>
+            </div>
+          </ScrollRevealText>
 
           <div className="relative">
             {/* Timeline line */}
@@ -572,9 +597,9 @@ export default function Home() {
                   "Maintained a 95%+ first-time fix rate across data center and on-site service calls",
                 ],
               },
-            ].map((job) => (
+            ].map((job, i) => (
+              <ScrollReveal key={job.company} delay={i * 0.15} y={50}>
               <div
-                key={job.company}
                 className="relative pl-8 pb-12 last:pb-0"
               >
                 {/* Timeline dot */}
@@ -600,6 +625,7 @@ export default function Home() {
                   ))}
                 </ul>
               </div>
+              </ScrollReveal>
             ))}
           </div>
         </div>
@@ -608,10 +634,13 @@ export default function Home() {
       {/* ─── ABOUT ─── */}
       <section id="about" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-4xl mx-auto">
-          <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>About</p>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">
-            Building at the intersection of AI and engineering.
-          </h2>
+          <ScrollRevealText>
+            <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>About</p>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-8">
+              Building at the intersection of AI and engineering.
+            </h2>
+          </ScrollRevealText>
+          <ScrollReveal y={40} delay={0.15}>
           <div className="space-y-5 theme-text-secondary text-lg leading-relaxed">
             <p>
               I&apos;m an AI Automation Engineer with a track record of building systems that dramatically cut operational costs.
@@ -626,21 +655,24 @@ export default function Home() {
               remote roles and on-site opportunities.
             </p>
           </div>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* ─── CONTACT ─── */}
       <section id="contact" className="px-6 md:px-12 py-32 border-t theme-border">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
-            Contact
-          </p>
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
-            Let&apos;s work together.
-          </h2>
-          <p className="theme-text-secondary text-lg mb-10 max-w-xl mx-auto">
-            Looking for an AI engineer who ships production systems? I&apos;m available as a contractor, consultant, or for full-time roles.
-          </p>
+          <ScrollRevealText>
+            <p className="text-sm font-medium tracking-widest uppercase mb-3" style={{ color: blue }}>
+              Contact
+            </p>
+            <h2 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
+              Let&apos;s work together.
+            </h2>
+            <p className="theme-text-secondary text-lg mb-10 max-w-xl mx-auto">
+              Looking for an AI engineer who ships production systems? I&apos;m available as a contractor, consultant, or for full-time roles.
+            </p>
+          </ScrollRevealText>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <a
