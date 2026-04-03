@@ -6,7 +6,7 @@ import Anthropic from "@anthropic-ai/sdk";
 // and use fetch() with OpenAI-compatible format instead.
 
 const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
+  apiKey: process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_KEY,
 });
 
 const KAYOU_SYSTEM = `You are Kayou, a custom AI assistant created by Aimar Mwembo. You were fine-tuned on Qwen2.5-32B with SFT and DPO training using 5,400+ training examples.
