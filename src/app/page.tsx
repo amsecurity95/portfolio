@@ -171,7 +171,7 @@ export default function Home() {
             {/* Photo */}
             <div className="relative flex-shrink-0">
               <div className="w-52 h-52 md:w-72 md:h-72 rounded-3xl overflow-hidden border theme-border relative">
-                <Image src="/aimar.jpg" alt="Aimar Mwembo" fill className="object-cover object-top" priority />
+                <Image src="/aimar.jpg" alt="Aimar M" fill className="object-cover object-top" priority />
               </div>
               <div className="absolute -inset-1 rounded-3xl -z-10 opacity-30 blur-2xl" style={{ background: blue }} />
             </div>
@@ -182,7 +182,7 @@ export default function Home() {
                 className="text-sm font-medium tracking-widest uppercase mb-4"
                 style={{ color: blue }}
               >
-                AI Automation & Prompt Engineer
+                AI Automation Engineer
               </p>
 
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.95] mb-6">
@@ -197,7 +197,7 @@ export default function Home() {
 
               <div className="flex items-center gap-3 justify-center lg:justify-start text-sm theme-text-muted">
                 <MapPin size={14} />
-                <span>Champaign-Urbana, IL</span>
+                <span>Illinois, USA</span>
                 <span className="theme-text-faint">|</span>
                 <span>Open to Remote</span>
               </div>
@@ -534,7 +534,7 @@ export default function Home() {
               {
                 role: "AI Automation & Internal Tools Engineer",
                 company: "Elite ICT",
-                location: "Champaign-Urbana, IL",
+                location: "Illinois, USA",
                 period: "2023 -- Present",
                 color: blue,
                 bullets: [
@@ -548,7 +548,7 @@ export default function Home() {
               {
                 role: "Founder & Lead Engineer",
                 company: "Puzzle Business Group",
-                location: "Champaign-Urbana, IL",
+                location: "Illinois, USA",
                 period: "2023 -- Present",
                 color: "#A855F7",
                 bullets: [
@@ -616,7 +616,7 @@ export default function Home() {
           </h2>
           <div className="space-y-5 theme-text-secondary text-lg leading-relaxed">
             <p>
-              I&apos;m an AI Automation & Prompt Engineer with a track record of building systems that dramatically cut operational costs.
+              I&apos;m an AI Automation Engineer with a track record of building systems that dramatically cut operational costs.
               My work spans custom LLMs, multi-agent platforms, mobile apps, and process automation.
             </p>
             <p>
@@ -624,7 +624,7 @@ export default function Home() {
               published an app on the iOS App Store, and automated an 8-hour manufacturing process down to 5 minutes.
             </p>
             <p>
-              I speak English, French, Lingala, and Swahili. I&apos;m based in Champaign-Urbana, IL and open to
+              I speak English, French, Lingala, and Swahili. I&apos;m based in Illinois, USA and open to
               remote roles and on-site opportunities.
             </p>
           </div>
@@ -669,7 +669,7 @@ export default function Home() {
       {/* ─── FOOTER ─── */}
       <footer className="px-6 md:px-12 py-8 border-t theme-border">
         <div className="max-w-6xl mx-auto flex items-center justify-between text-xs theme-text-faint">
-          <span>&copy; 2026 Aimar Mwembo</span>
+          <span>&copy; 2026 Aimar M</span>
           <span>Built with Next.js & Claude</span>
         </div>
       </footer>

@@ -63,7 +63,7 @@ export default function KayouPage() {
               Kayou
               <span className="w-2 h-2 bg-green-500 rounded-full" />
             </h1>
-            <p className="text-xs text-neutral-500">Custom LLM by Aimar Mwembo</p>
+            <p className="text-xs text-neutral-500">Custom LLM by Aimar M</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06]">
@@ -88,7 +88,7 @@ export default function KayouPage() {
               </div>
               <h2 className="text-2xl font-bold text-white mb-2">Meet Kayou</h2>
               <p className="text-neutral-400 text-sm max-w-md mx-auto mb-8 leading-relaxed">
-                A custom AI built and trained by Aimar Mwembo.
+                A custom AI built and trained by Aimar M.
                 Speaks English, French, Lingala, and Swahili. Teach him something new.
               </p>
 

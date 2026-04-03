@@ -168,7 +168,7 @@ export default function ProjectShowcase({ name, tagline, icon, color, stack, dem
 
       {/* Footer */}
       <div className="px-6 py-8 theme-border border-t text-center">
-        <p className="text-xs theme-text-faint">Built by Aimar Mwembo</p>
+        <p className="text-xs theme-text-faint">Built by Aimar M</p>
       </div>
     </main>
   );
