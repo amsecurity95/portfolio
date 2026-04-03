@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     }
 
     const response = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6-20250410",
       max_tokens: 500,
       system: KAYOU_SYSTEM,
       messages: messages.map((m: ChatMessage) => ({
