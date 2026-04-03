@@ -666,9 +666,8 @@ export default function Home() {
 
       {/* ─── FOOTER ─── */}
       <footer className="px-6 md:px-12 py-8 border-t theme-border">
-        <div className="max-w-6xl mx-auto flex items-center justify-between text-xs theme-text-faint">
+        <div className="max-w-6xl mx-auto text-center text-xs theme-text-faint">
           <span>&copy; 2026 Aimar</span>
-          <span>Built with Next.js & Claude</span>
         </div>
       </footer>
     </main>
