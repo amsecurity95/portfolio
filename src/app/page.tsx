@@ -192,7 +192,7 @@ export default function Home() {
               </h1>
 
               <p className="text-lg md:text-xl theme-text-secondary font-light max-w-lg mb-4">
-                I don&apos;t just write code — I build systems that save companies time and money.
+                I&apos;ve built several automation web apps and mobile applications for companies in Illinois to automate their workflow. Try out my AI Kayou that I built and trained.
               </p>
 
               <div className="flex items-center gap-3 justify-center lg:justify-start text-sm theme-text-muted">
@@ -203,8 +203,8 @@ export default function Home() {
               </div>
 
               <div className="flex gap-4 mt-8 justify-center lg:justify-start">
-                <a href="#work" className="px-7 py-3 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105" style={{ background: blue }}>
-                  View work
+                <a href="/kayou" className="px-7 py-3 rounded-full text-sm font-semibold transition-all duration-200 hover:scale-105" style={{ background: blue }}>
+                  Talk to Kayou AI
                 </a>
                 <a href="#contact" className="px-7 py-3 rounded-full text-sm font-semibold border border-white/[0.12] theme-text hover:theme-icon-box transition-all duration-200">
                   Contact
