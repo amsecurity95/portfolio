@@ -48,7 +48,7 @@ export default function KayouPage() {
   };
 
   return (
-    <main className="min-h-screen bg-black flex flex-col">
+    <main className="min-h-screen bg-black flex flex-col overflow-x-hidden">
       {/* Header */}
       <header className="border-b border-white/[0.06] px-6 py-4 flex items-center gap-4">
         <a href="/#work" className="text-neutral-500 hover:text-white transition-colors">

@@ -188,7 +188,7 @@ export default function Home() {
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[0.95] mb-6">
                 Aimar
                 <br />
-                Mwembo
+                M
               </h1>
 
               <p className="text-lg md:text-xl theme-text-secondary font-light max-w-lg mb-4">
