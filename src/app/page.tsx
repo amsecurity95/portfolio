@@ -211,6 +211,29 @@ export default function Home() {
             </div>
           </div>
         </div>
+        {/* Dark blue wave */}
+        <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
+          <svg className="w-full" viewBox="0 0 1440 150" preserveAspectRatio="none" style={{ display: 'block' }}>
+            <path fill="#0A2463" opacity="0.4" d="M0,80 C360,120 720,40 1080,80 C1260,100 1380,70 1440,75 L1440,150 L0,150Z">
+              <animate attributeName="d" dur="8s" repeatCount="indefinite" values="
+                M0,80 C360,120 720,40 1080,80 C1260,100 1380,70 1440,75 L1440,150 L0,150Z;
+                M0,70 C360,35 720,110 1080,60 C1260,45 1380,90 1440,80 L1440,150 L0,150Z;
+                M0,80 C360,120 720,40 1080,80 C1260,100 1380,70 1440,75 L1440,150 L0,150Z" />
+            </path>
+            <path fill="#1a56db" opacity="0.3" d="M0,100 C480,70 960,120 1440,90 L1440,150 L0,150Z">
+              <animate attributeName="d" dur="6s" repeatCount="indefinite" values="
+                M0,100 C480,70 960,120 1440,90 L1440,150 L0,150Z;
+                M0,85 C480,115 960,60 1440,100 L1440,150 L0,150Z;
+                M0,100 C480,70 960,120 1440,90 L1440,150 L0,150Z" />
+            </path>
+            <path fill="#146EF5" opacity="0.15" d="M0,115 C240,95 720,130 1200,105 C1350,100 1440,110 1440,110 L1440,150 L0,150Z">
+              <animate attributeName="d" dur="10s" repeatCount="indefinite" values="
+                M0,115 C240,95 720,130 1200,105 C1350,100 1440,110 1440,110 L1440,150 L0,150Z;
+                M0,105 C240,125 720,90 1200,115 C1350,120 1440,105 1440,105 L1440,150 L0,150Z;
+                M0,115 C240,95 720,130 1200,105 C1350,100 1440,110 1440,110 L1440,150 L0,150Z" />
+            </path>
+          </svg>
+        </div>
       </section>
 
       {/* ─── WORK ─── */}
