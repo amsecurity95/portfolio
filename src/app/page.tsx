@@ -14,7 +14,7 @@ import WelcomeOverlay from "@/components/WelcomeOverlay";
 import LiquidWaves from "@/components/LiquidWaves";
 import ScrollReveal, { ScrollRevealText } from "@/components/ScrollReveal";
 
-const blue = "#146EF5";
+const blue = "#7C3AED";
 
 const projects = [
   {
@@ -262,7 +262,7 @@ export default function Home() {
                         <Image src={p.logo} alt={p.name} fill className={p.zoomIcon ? "object-cover scale-[1.03]" : "object-contain p-1.5"} />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold theme-text group-hover:text-[#146EF5] transition-colors duration-200">
+                        <h3 className="text-lg font-semibold theme-text group-hover:text-[#7C3AED] transition-colors duration-200">
                           {p.name}
                         </h3>
                         <span className="text-xs theme-text-muted">{p.tag}</span>
@@ -295,7 +295,7 @@ export default function Home() {
       {/* ─── KAYOU SPOTLIGHT ─── */}
       <section className="px-6 md:px-12 py-32 border-t theme-border relative overflow-hidden">
         {/* Subtle blue glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#146EF5]/[0.04] rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#7C3AED]/[0.04] rounded-full blur-[120px] pointer-events-none" />
 
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="flex flex-col lg:flex-row gap-16 items-center">
@@ -351,7 +351,7 @@ export default function Home() {
                   title: "Kayou LLM",
                   desc: "Custom fine-tuned model trained with SFT + DPO. Speaks English, French, Lingala, and Swahili.",
                   href: "/kayou",
-                  accent: "#146EF5",
+                  accent: "#7C3AED",
                   icon: "/kayou-logo.png",
                 },
                 {
@@ -378,7 +378,7 @@ export default function Home() {
                     <Image src={product.icon} alt={product.title} fill className="object-cover" />
                   </div>
                   <div className="flex-1">
-                    <h4 className="theme-text font-semibold text-sm group-hover:text-[#146EF5] transition-colors flex items-center gap-2">
+                    <h4 className="theme-text font-semibold text-sm group-hover:text-[#7C3AED] transition-colors flex items-center gap-2">
                       {product.title}
                       <ArrowUpRight size={14} className="theme-text-faint group-hover:theme-text transition-colors" />
                     </h4>
@@ -410,7 +410,7 @@ export default function Home() {
               {skills.map((s) => (
                 <div
                   key={s.name}
-                  className="flex flex-col items-center gap-3 py-6 px-4 rounded-xl border theme-border theme-card hover:border-[#146EF5]/30 transition-all duration-200 cursor-default"
+                  className="flex flex-col items-center gap-3 py-6 px-4 rounded-xl border theme-border theme-card hover:border-[#7C3AED]/30 transition-all duration-200 cursor-default"
                 >
                   <span className="text-2xl theme-text-secondary">{s.icon}</span>
                   <span className="text-xs font-medium theme-text-secondary">{s.name}</span>
@@ -481,7 +481,7 @@ export default function Home() {
                   org: "University of Congo",
                   icon: <GraduationCap size={20} />,
                   type: "Degree",
-                  color: "#146EF5",
+                  color: "#7C3AED",
                 },
               ].map((cert) => {
                 const inner = (
