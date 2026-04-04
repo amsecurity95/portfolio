@@ -59,8 +59,8 @@ const projects = [
   {
     name: "Tropical Map",
     tag: "Mobile",
-    desc: "Civic infrastructure mapping app. Published on the iOS App Store with active users.",
-    metric: "App Store live",
+    desc: "Civic infrastructure mapping app for Congolese cities with geospatial data layers.",
+    metric: "Live app",
     stack: ["React Native", "Express"],
     logo: "/projects/tropical-map.png",
     link: "/tropical-map",
@@ -213,7 +213,7 @@ export default function Home() {
             {/* Subtitle */}
             <ScrollRevealText delay={0.35}>
               <p className="text-lg md:text-xl theme-text-muted font-light max-w-2xl mx-auto mb-6 leading-relaxed">
-                I&apos;ve built several automation web apps and mobile applications
+                I&apos;ve built several automation web apps, softwares, and mobile applications
                 for companies in Illinois to automate their workflow.
                 Try out my AI Kayou that I built and trained.
               </p>
@@ -527,7 +527,7 @@ export default function Home() {
                   "Founded and operate a multi-division holding company with active tech, logistics, and creative studio arms",
                   "Building Chambana Rides, a community-based rideshare platform for airport/long-distance trips with an 80/20 driver-favorable commission model",
                   "Developing Akili Money, a USD-to-DRC mobile money transfer app targeting Congolese diaspora remittances with Thunes API integration",
-                  "Published Tropical Map to the iOS App Store — a civic infrastructure and digital addressing platform for Congolese cities",
+                  "Built Tropical Map — a civic infrastructure and digital addressing platform for Congolese cities with geospatial command center and real-time data layers",
                   "Built and deployed puzzlemasterprod.com, a Next.js music album site with Stripe payments and Cloudflare R2 audio CDN",
                   "Designed and architected OpenDeploy (sOlid), a self-hosted PaaS platform inspired by Railway",
                 ],
@@ -601,7 +601,7 @@ export default function Home() {
               </p>
               <p>
                 I trained my own large language model on Qwen2.5-32B, built a 9-agent AI orchestration platform,
-                published an app on the iOS App Store, and automated an 8-hour manufacturing process down to 5 minutes.
+                and automated an 8-hour manufacturing process down to 5 minutes.
               </p>
               <p>
                 I speak English, French, Lingala, and Swahili. I&apos;m based in Illinois, USA and open to
