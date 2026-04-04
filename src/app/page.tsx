@@ -194,11 +194,9 @@ export default function Home() {
             {/* Hero heading */}
             <ScrollRevealText delay={0.2}>
               <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.9] mb-8">
-                <span className="gradient-text">Building</span>
+                <span className="theme-text">Hi, I&apos;m</span>
                 <br />
-                <span className="theme-text">the future</span>
-                <br />
-                <span className="theme-text-muted">with AI</span>
+                <span className="gradient-text">Aimar</span>
               </h1>
             </ScrollRevealText>
 
