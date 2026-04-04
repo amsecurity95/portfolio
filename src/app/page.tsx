@@ -605,7 +605,7 @@ export default function Home() {
               </p>
               <p>
                 I speak English, French, Lingala, and Swahili. I&apos;m based in Illinois, USA and open to
-                remote roles and on-site opportunities.
+                remote roles, collaboration, and consultation.
               </p>
             </div>
           </ScrollReveal>
