@@ -183,16 +183,26 @@ export default function Home() {
 
         <div className="max-w-5xl mx-auto w-full relative z-10">
           <div className="text-center">
+            {/* Photo */}
+            <ScrollReveal delay={0.1} y={30} scale={0.95}>
+              <div className="relative inline-block mb-6">
+                <div className="w-28 h-28 md:w-36 md:h-36 rounded-full overflow-hidden border-2 relative mx-auto" style={{ borderColor: accent }}>
+                  <Image src="/aimar.jpg" alt="Aimar" fill className="object-cover object-top" priority />
+                </div>
+                <div className="absolute -inset-4 rounded-full -z-10 opacity-20 blur-3xl" style={{ background: accent }} />
+              </div>
+            </ScrollReveal>
+
             {/* Badge */}
-            <ScrollRevealText delay={0.1}>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-8" style={{ borderColor: 'var(--border)', background: 'var(--bg-card)' }}>
+            <ScrollRevealText delay={0.2}>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-6" style={{ borderColor: 'var(--border)', background: 'var(--bg-card)' }}>
                 <Sparkles size={14} style={{ color: accent }} />
                 <span className="text-xs font-medium theme-text-muted">AI Automation Engineer</span>
               </div>
             </ScrollRevealText>
 
             {/* Hero heading */}
-            <ScrollRevealText delay={0.2}>
+            <ScrollRevealText delay={0.3}>
               <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.9] mb-8">
                 <span className="theme-text">Hi, I&apos;m</span>
                 <br />
@@ -232,15 +242,6 @@ export default function Home() {
               </div>
             </ScrollRevealText>
 
-            {/* Photo */}
-            <ScrollReveal delay={0.6} y={60} scale={0.9}>
-              <div className="mt-16 relative inline-block">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 relative mx-auto" style={{ borderColor: accent }}>
-                  <Image src="/aimar.jpg" alt="Aimar" fill className="object-cover object-top" priority />
-                </div>
-                <div className="absolute -inset-4 rounded-full -z-10 opacity-20 blur-3xl" style={{ background: accent }} />
-              </div>
-            </ScrollReveal>
           </div>
         </div>
       </section>
