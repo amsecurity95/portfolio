@@ -67,7 +67,7 @@ export default function KayouPage() {
           </div>
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06]">
-          <Sparkles size={12} className="text-[#7C3AED]" />
+          <Sparkles size={12} className="text-[#2563EB]" />
           <span className="text-xs text-neutral-400">Custom LLM</span>
         </div>
       </header>
@@ -128,7 +128,7 @@ export default function KayouPage() {
               <div
                 className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                   msg.role === "user"
-                    ? "bg-[#7C3AED] text-white rounded-br-md"
+                    ? "bg-[#2563EB] text-white rounded-br-md"
                     : "bg-white/[0.06] text-neutral-200 rounded-bl-md"
                 }`}
               >
@@ -172,7 +172,7 @@ export default function KayouPage() {
             </linearGradient>
             <linearGradient id="waveGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#1e3a8a" />
-              <stop offset="50%" stopColor="#7C3AED" />
+              <stop offset="50%" stopColor="#2563EB" />
               <stop offset="100%" stopColor="#1e3a8a" />
             </linearGradient>
             <linearGradient id="waveGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -212,7 +212,7 @@ export default function KayouPage() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && send()}
             placeholder="Message Kayou..."
-            className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#7C3AED]/50 transition-colors"
+            className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#2563EB]/50 transition-colors"
             disabled={loading}
           />
           <motion.button
@@ -221,7 +221,7 @@ export default function KayouPage() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="w-12 h-12 rounded-xl flex items-center justify-center transition-colors disabled:opacity-30"
-            style={{ background: "#7C3AED" }}
+            style={{ background: "#2563EB" }}
           >
             {loading ? (
               <Loader2 size={18} className="animate-spin text-white" />

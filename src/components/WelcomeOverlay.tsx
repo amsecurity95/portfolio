@@ -132,7 +132,7 @@ export default function WelcomeOverlay() {
                   animate={{ opacity: [1, 0] }}
                   transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
                   className="inline-block w-0.5 h-4 ml-0.5 align-middle"
-                  style={{ background: "#7C3AED" }}
+                  style={{ background: "#2563EB" }}
                 />
               </p>
             </motion.div>
@@ -150,7 +150,7 @@ export default function WelcomeOverlay() {
                   className="h-1 rounded-full transition-all duration-500"
                   style={{
                     width: i === msgIndex ? 20 : 6,
-                    background: i === msgIndex ? "#7C3AED" : "rgba(255,255,255,0.15)",
+                    background: i === msgIndex ? "#2563EB" : "rgba(255,255,255,0.15)",
                   }}
                 />
               ))}
@@ -163,7 +163,7 @@ export default function WelcomeOverlay() {
               transition={{ duration: 0.5, delay: 1.5 }}
               onClick={dismiss}
               className="text-sm font-medium px-6 py-2.5 rounded-full transition-all duration-200"
-              style={{ background: "#7C3AED", color: "#fff" }}
+              style={{ background: "#2563EB", color: "#fff" }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
             >

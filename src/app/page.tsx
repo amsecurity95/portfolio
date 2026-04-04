@@ -14,7 +14,7 @@ import WelcomeOverlay from "@/components/WelcomeOverlay";
 import LiquidWaves from "@/components/LiquidWaves";
 import ScrollReveal, { ScrollRevealText } from "@/components/ScrollReveal";
 
-const accent = "#7C3AED";
+const accent = "#2563EB";
 
 const projects = [
   {
@@ -178,8 +178,8 @@ export default function Home() {
       <section className="relative min-h-screen flex items-center justify-center pt-24 pb-20 px-6 md:px-12 overflow-hidden">
         {/* Glow orbs */}
         <div className="glow-orb w-[500px] h-[500px] top-[-10%] left-[-10%]" style={{ background: accent }} />
-        <div className="glow-orb w-[400px] h-[400px] bottom-[10%] right-[-5%]" style={{ background: '#a78bfa' }} />
-        <div className="glow-orb w-[300px] h-[300px] top-[40%] left-[60%]" style={{ background: '#6d28d9' }} />
+        <div className="glow-orb w-[400px] h-[400px] bottom-[10%] right-[-5%]" style={{ background: '#60a5fa' }} />
+        <div className="glow-orb w-[300px] h-[300px] top-[40%] left-[60%]" style={{ background: '#1d4ed8' }} />
 
         <div className="max-w-5xl mx-auto w-full relative z-10">
           <div className="text-center">
@@ -354,7 +354,7 @@ export default function Home() {
                 desc: "Custom fine-tuned model trained with SFT + DPO. Speaks English, French, Lingala, and Swahili.",
                 href: "/kayou",
                 icon: "/kayou-logo.png",
-                gradient: "from-purple-500/10 to-transparent",
+                gradient: "from-blue-500/10 to-transparent",
               },
               {
                 title: "Kayou Chat",
@@ -579,7 +579,7 @@ export default function Home() {
       {/* ─── ABOUT ─── */}
       <div className="section-divider" />
       <section id="about" className="px-6 md:px-12 py-28 relative overflow-hidden">
-        <div className="glow-orb w-[400px] h-[400px] bottom-0 right-[-10%]" style={{ background: '#6d28d9' }} />
+        <div className="glow-orb w-[400px] h-[400px] bottom-0 right-[-10%]" style={{ background: '#1d4ed8' }} />
 
         <div className="max-w-3xl mx-auto relative z-10">
           <ScrollRevealText>

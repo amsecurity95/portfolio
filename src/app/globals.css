@@ -17,8 +17,8 @@
   --text-secondary: #a1a1aa;
   --text-muted: #71717a;
   --text-faint: #3f3f46;
-  --accent: #7C3AED;
-  --accent-glow: rgba(124,58,237,0.15);
+  --accent: #2563EB;
+  --accent-glow: rgba(37,99,235,0.15);
   --scrollbar-track: #0a0a0a;
   --scrollbar-thumb: #27272a;
   --scrollbar-hover: #3f3f46;
@@ -41,8 +41,8 @@
   --text-secondary: #3f3f46;
   --text-muted: #71717a;
   --text-faint: #a1a1aa;
-  --accent: #7C3AED;
-  --accent-glow: rgba(124,58,237,0.08);
+  --accent: #2563EB;
+  --accent-glow: rgba(37,99,235,0.08);
   --scrollbar-track: #fafafa;
   --scrollbar-thumb: #d4d4d8;
   --scrollbar-hover: #a1a1aa;
@@ -78,14 +78,14 @@ body {
 
 /* ─── Gradient text ─── */
 .gradient-text {
-  background: linear-gradient(135deg, #fff 0%, #7C3AED 50%, #a78bfa 100%);
+  background: linear-gradient(135deg, #fff 0%, #2563EB 50%, #60a5fa 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 [data-theme="light"] .gradient-text {
-  background: linear-gradient(135deg, #09090b 0%, #7C3AED 50%, #6d28d9 100%);
+  background: linear-gradient(135deg, #09090b 0%, #2563EB 50%, #1d4ed8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -119,7 +119,7 @@ body {
   inset: 0;
   border-radius: 20px;
   padding: 1px;
-  background: linear-gradient(135deg, rgba(124,58,237,0), rgba(124,58,237,0.1), rgba(124,58,237,0));
+  background: linear-gradient(135deg, rgba(37,99,235,0), rgba(37,99,235,0.1), rgba(37,99,235,0));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -225,7 +225,7 @@ body {
   transition: all 0.3s ease;
 }
 .stat-card:hover {
-  border-color: rgba(124,58,237,0.3);
+  border-color: rgba(37,99,235,0.3);
   box-shadow: 0 0 30px var(--accent-glow);
 }
 .stat-value {
