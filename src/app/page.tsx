@@ -212,7 +212,7 @@ export default function Home() {
 
             {/* Subtitle */}
             <ScrollRevealText delay={0.35}>
-              <p className="text-lg md:text-xl theme-text-muted font-light max-w-2xl mx-auto mb-6 leading-relaxed">
+              <p className="text-base md:text-xl theme-text-secondary font-normal max-w-2xl mx-auto mb-6 leading-relaxed px-2">
                 I&apos;ve built several automation web apps, softwares, and mobile applications
                 for companies in Illinois to automate their workflow.
                 Try out my AI Kayou that I built and trained.
@@ -220,7 +220,7 @@ export default function Home() {
             </ScrollRevealText>
 
             <ScrollRevealText delay={0.4}>
-              <div className="flex items-center justify-center gap-3 text-sm theme-text-faint mb-10">
+              <div className="flex items-center justify-center gap-3 text-sm theme-text-muted mb-10">
                 <MapPin size={14} />
                 <span>Illinois, USA</span>
                 <span>|</span>
