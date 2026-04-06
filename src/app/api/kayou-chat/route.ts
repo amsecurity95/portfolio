@@ -1,6 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 
+// Simple rate limiter — 10 requests per minute per IP
+const rateMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 10;
+const RATE_WINDOW = 60_000;
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateMap.get(ip);
+  if (!entry || now > entry.resetTime) {
+    rateMap.set(ip, { count: 1, resetTime: now + RATE_WINDOW });
+    return false;
+  }
+  entry.count++;
+  return entry.count > RATE_LIMIT;
+}
+
 // When Kayou LLM is deployed on vLLM, swap this to:
 // const KAYOU_URL = "https://your-gpu-server.com/v1/chat/completions";
 // and use fetch() with OpenAI-compatible format instead.
@@ -31,6 +47,11 @@ interface ChatMessage {
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0] || "unknown";
+    if (isRateLimited(ip)) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const { messages } = await req.json() as { messages: ChatMessage[] };
 
     if (!messages || messages.length === 0) {
