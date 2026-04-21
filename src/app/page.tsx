@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ArrowUpRight, MapPin, Mail, Shield, Monitor, Brain, Palette, GraduationCap, ExternalLink, Check, Sun, Moon, Sparkles } from "lucide-react";
 import { SiGithub } from "react-icons/si";
-import { FaLinkedinIn } from "react-icons/fa";
 import {
   SiPython, SiReact, SiNextdotjs, SiNodedotjs, SiTypescript,
   SiTailwindcss, SiSupabase, SiFramer, SiOpenai, SiAnthropic, SiGoogle,
@@ -444,7 +443,7 @@ export default function Home() {
                 { name: "Google AI Foundations", org: "Google", icon: <Brain size={20} />, type: "Professional Certificate", color: "#FBBC05", googleIcon: true },
                 { name: "MCP: Advanced Topics", org: "Anthropic", icon: <SiAnthropic size={20} />, type: "Professional Certificate", color: "#D4A574", link: "/claude-certificate.pdf" },
                 { name: "Google UX Design", org: "Google", icon: <Palette size={20} />, type: "Professional Certificate", color: "#EA4335", googleIcon: true, link: "/cert-ux-design.png" },
-                { name: "Computer Science", org: "University of Congo", icon: <GraduationCap size={20} />, type: "Degree", color: accent },
+                { name: "Computer Science", org: "DRC Congo", icon: <GraduationCap size={20} />, type: "Degree", color: accent },
               ].map((cert, i) => {
                 const inner = (
                   <>
@@ -645,9 +644,6 @@ export default function Home() {
             <div className="flex justify-center gap-5">
               <a href="https://github.com/amsecurity95" target="_blank" rel="noopener noreferrer" className="w-11 h-11 rounded-full border flex items-center justify-center theme-text-muted hover:theme-text transition-all duration-300 hover:border-[var(--border-hover)]" style={{ borderColor: 'var(--border)', background: 'var(--bg-card)' }}>
                 <SiGithub size={18} />
-              </a>
-              <a href="https://linkedin.com/in/amsecurity95" target="_blank" rel="noopener noreferrer" className="w-11 h-11 rounded-full border flex items-center justify-center theme-text-muted hover:theme-text transition-all duration-300 hover:border-[var(--border-hover)]" style={{ borderColor: 'var(--border)', background: 'var(--bg-card)' }}>
-                <FaLinkedinIn size={18} />
               </a>
             </div>
           </ScrollRevealText>
